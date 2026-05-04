@@ -1,4 +1,4 @@
-import { Mail, Lock, User, Code2, Globe } from "lucide-react";
+import { Mail, Lock, User } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/schemas/auth/auth";
 import type { SignupDTO } from "@/types/services/auth";
 import Loader from "@/utils/Loader";
+import { OAuthButtons } from "@/components/auth/OAuthButtons";
 
 export const SignupPage = () => {
   const {
@@ -43,23 +44,7 @@ export const SignupPage = () => {
         <CardContent className="space-y-6">
           {/* OAuth */}
           <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:gap-2">
-              <button className="w-full gap-2 flex items-center justify-center bg-muted py-2 rounded-sm cursor-pointer group">
-                <Globe
-                  size={18}
-                  className="transition-transform duration-500 group-hover:rotate-180"
-                />
-                Google
-              </button>
-
-              <button className="w-full gap-2 flex items-center justify-center bg-muted py-2 rounded-sm cursor-pointer group">
-                <Code2
-                  size={18}
-                  className="transition-transform duration-500 group-hover:rotate-180"
-                />
-                GitHub
-              </button>
-            </div>
+            <OAuthButtons />
 
             <div className="flex items-center gap-2">
               <div className="h-px flex-1 bg-border" />

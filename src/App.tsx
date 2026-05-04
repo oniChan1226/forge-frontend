@@ -13,7 +13,7 @@ function App() {
       <AppProviders>
         <AppRoutes />
       </AppProviders>
-      <Toaster position="top-right" richColors expand closeButton />
+      <Toaster position="top-right" richColors />
     </BrowserRouter>
   );
 }

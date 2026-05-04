@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Lock, Code2, Globe } from "lucide-react";
+import { Mail, Lock} from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useLoginMutation } from "@/hooks/mutations/useAuth.mutations";
 import { Link } from "react-router-dom";
 import Loader from "@/utils/Loader";
+import { OAuthButtons } from "@/components/auth/OAuthButtons";
 
 export const LoginPage = () => {
   const loginMutation = useLoginMutation();
@@ -33,22 +34,7 @@ export const LoginPage = () => {
         <CardContent className="space-y-6">
           {/* OAuth */}
           <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:gap-2">
-              <button className="w-full gap-2 flex items-center justify-center bg-muted py-2 rounded-sm cursor-pointer group">
-                <Globe
-                  size={18}
-                  className="transition-transform duration-500 ease-in-out group-hover:rotate-180"
-                />
-                Google
-              </button>
-              <button className="w-full gap-2 flex items-center justify-center bg-muted py-2 rounded-sm cursor-pointer group">
-                <Code2
-                  size={18}
-                  className="transition-transform duration-500 ease-in-out group-hover:transform-[rotateY(180deg)]"
-                />
-                GitHub
-              </button>
-            </div>
+            <OAuthButtons />
 
             <div className="flex items-center gap-2">
               <div className="h-px flex-1 bg-border" />
