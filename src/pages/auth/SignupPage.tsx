@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/schemas/auth/auth";
 import type { SignupDTO } from "@/types/services/auth";
+import Loader from "@/utils/Loader";
 
 export const SignupPage = () => {
   const {
@@ -129,7 +130,11 @@ export const SignupPage = () => {
 
             {/* Submit */}
             <Button type="submit" className="w-full">
-              Create account
+              <Loader
+                isLoading={signupMutation.isPending}
+                loadingText="Creating account..."
+                loadedText="Create account"
+              />
             </Button>
           </form>
 

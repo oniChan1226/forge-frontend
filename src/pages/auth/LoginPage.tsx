@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useLoginMutation } from "@/hooks/mutations/useAuth.mutations";
 import { Link } from "react-router-dom";
+import Loader from "@/utils/Loader";
 
 export const LoginPage = () => {
   const loginMutation = useLoginMutation();
@@ -103,10 +104,14 @@ export const LoginPage = () => {
             {/* Submit */}
             <Button
               type="submit"
-              className="w-full"
+              className="w-full flex items-center justify-center gap-2"
               disabled={loginMutation.isPending}
             >
-              {loginMutation.isPending ? "Signing in..." : "Sign in"}
+              <Loader
+                isLoading={loginMutation.isPending}
+                loadingText="Signing in..."
+                loadedText="Sign in"
+              />
             </Button>
 
             {/* Error */}
