@@ -18,21 +18,25 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// TODO: test
 apiClient.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const status = error.response?.status;
+    const code = error.response?.data?.code;
+    console.log("API error:", { response: error.response, status, code });
+
+    // only refresh if token expired
+    if (status === 401 && code === "TOKEN_EXPIRED" && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      // call refresh endpoint
       const { data } = await apiClient.post("/auth/refresh-token");
 
       localStorage.setItem("accessToken", data.accessToken);
 
       originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+
       return apiClient(originalRequest);
     }
 

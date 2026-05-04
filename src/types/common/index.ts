@@ -2,6 +2,7 @@
 export interface ApiError {
     message: string;
     success: false;
+    code: string;
     errorStack?: string;
 }
 export interface ApiResponse<T> {
