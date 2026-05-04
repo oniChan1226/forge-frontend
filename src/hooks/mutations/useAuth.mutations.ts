@@ -12,3 +12,15 @@ export const useLoginMutation = () => {
     },
   });
 };
+
+export const useSignupMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: AuthService.signup,
+    onSuccess: async (data) => {
+      localStorage.setItem("accessToken", data.accessToken);
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+};

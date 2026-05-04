@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Mail, Lock, User, Code2, Globe } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,22 +5,30 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
+import { useSignupMutation } from "@/hooks/mutations/useAuth.mutations";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signupSchema } from "@/schemas/auth/auth";
+import type { SignupDTO } from "@/types/services/auth";
 
 export const SignupPage = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupDTO>({
+    resolver: zodResolver(signupSchema),
+  });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // TODO: signup mutation here
-    console.log({ name, email, password });
+  const signupMutation = useSignupMutation();
+
+  const onSubmit = (data: SignupDTO) => {
+    signupMutation.mutate(data);
   };
 
   return (
     <div className="flex items-center justify-center">
       <Card className="sm:w-md max-w-lg shadow-xl border-border/50">
-
         {/* Header */}
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-2xl font-semibold">
@@ -33,7 +40,6 @@ export const SignupPage = () => {
         </CardHeader>
 
         <CardContent className="space-y-6">
-
           {/* OAuth */}
           <div className="space-y-3">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:gap-2">
@@ -64,8 +70,7 @@ export const SignupPage = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -76,13 +81,11 @@ export const SignupPage = () => {
                   size={18}
                 />
                 <Input
-                  id="name"
-                  type="text"
+                  {...register("name")}
                   placeholder="John Doe"
                   className="pl-10"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
                 />
+                <p className="text-xs text-red-500">{errors.name?.message}</p>
               </div>
             </div>
 
@@ -96,13 +99,11 @@ export const SignupPage = () => {
                   size={18}
                 />
                 <Input
-                  id="email"
-                  type="email"
+                  {...register("email")}
                   placeholder="you@example.com"
                   className="pl-10"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                 />
+                <p className="text-xs text-red-500">{errors.email?.message}</p>
               </div>
             </div>
 
@@ -116,13 +117,13 @@ export const SignupPage = () => {
                   size={18}
                 />
                 <Input
-                  id="password"
+                  {...register("password")}
                   type="password"
-                  placeholder="••••••••"
                   className="pl-10"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                 />
+                <p className="text-xs text-red-500">
+                  {errors.password?.message}
+                </p>
               </div>
             </div>
 

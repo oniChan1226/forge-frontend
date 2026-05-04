@@ -1,9 +1,9 @@
 import { Navigate } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
-import { LoginPage } from "@/pages/LoginPage";
-import { SignupPage } from "@/pages/SignupPage";
-import { DashboardPage } from "@/pages/DashboardPage";
+import { LoginPage } from "@/pages/auth/LoginPage";
+import { SignupPage } from "@/pages/auth/SignupPage";
+import { DashboardPage } from "@/pages/protected/DashboardPage";
 import { AuthRoute } from "./AuthRoute";
 
 export const appRoutes = [
