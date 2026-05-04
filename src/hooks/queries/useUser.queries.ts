@@ -1,9 +1,10 @@
-import { getMe } from "@/services/user.service";
+import { UserService } from "@/services/user.service";
 import { useQuery } from "@tanstack/react-query";
 
-export const useMe = () => {
+export const useMeQuery = () => {
   return useQuery({
     queryKey: ["me"],
-    queryFn: getMe,
+    queryFn: UserService.me,
+    retry: false,
   });
 };
