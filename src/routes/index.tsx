@@ -1,25 +1,26 @@
 import { Navigate } from "react-router-dom";
-import { ProtectedRoute, PublicRoute } from "@/components/ProtectedRoute";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 import { LoginPage } from "@/pages/LoginPage";
 import { SignupPage } from "@/pages/SignupPage";
 import { DashboardPage } from "@/pages/DashboardPage";
+import { AuthRoute } from "./AuthRoute";
 
 export const appRoutes = [
   {
     path: "/login",
     element: (
-      <PublicRoute>
+      <AuthRoute>
         <LoginPage />
-      </PublicRoute>
+      </AuthRoute>
     ),
   },
   {
     path: "/signup",
     element: (
-      <PublicRoute>
+      <AuthRoute>
         <SignupPage />
-      </PublicRoute>
+      </AuthRoute>
     ),
   },
   {
