@@ -1,6 +1,5 @@
-import { useEffect } from "react";
+
 import { BrowserRouter, useRoutes } from "react-router-dom";
-import { useAuthStore } from "@/store/authStore";
 import { appRoutes } from "./routes";
 import { AppProviders } from "./providers/app-providers";
 
@@ -9,11 +8,6 @@ function AppRoutes() {
 }
 
 function App() {
-  const checkAuth = useAuthStore((state) => state.checkAuth);
-
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
 
   return (
     <BrowserRouter>
