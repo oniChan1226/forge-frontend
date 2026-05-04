@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { BrowserRouter, useRoutes } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { appRoutes } from "./routes";
-import "./App.css";
+import { AppProviders } from "./providers/app-providers";
 
 function AppRoutes() {
   return useRoutes(appRoutes);
@@ -17,7 +17,9 @@ function App() {
 
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <AppProviders>
+        <AppRoutes />
+      </AppProviders>
     </BrowserRouter>
   );
 }
