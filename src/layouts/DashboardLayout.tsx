@@ -24,7 +24,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         ${collapsed ? "w-20" : "w-64"}`}
       >
         {/* Logo / Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b">
+        <div className="h-16 flex items-center justify-between px-4">
           {!collapsed && (
             <div className="flex items-center justify-center space-x-1">
               <img src={Logo} alt="Logo" className="w-7 h-7 rounded-md" />

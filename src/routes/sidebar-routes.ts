@@ -11,7 +11,7 @@ import {
 export const sidebarRoutes = [
   {
     label: "Overview",
-    to: "/overview",
+    to: "/dashboard",
     icon: LayoutDashboard,
   },
   {

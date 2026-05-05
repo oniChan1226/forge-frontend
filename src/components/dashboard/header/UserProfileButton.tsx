@@ -47,7 +47,7 @@ const UserProfileButton = () => {
             </AvatarFallback>
           </Avatar>
 
-          <div className="leading-tight">
+          <div className="leading-tight max-w-32">
             {isLoading ? (
               <>
                 <p className="text-sm font-medium animate-pulse">Loading...</p>
@@ -55,8 +55,8 @@ const UserProfileButton = () => {
               </>
             ) : (
               <>
-                <p className="font-medium text-sm">{name}</p>
-                <p className="text-xs text-gray-500">{email}</p>
+                <p className="font-medium text-sm capitalize truncate">{name}</p>
+                <p className="text-xs text-gray-500 truncate">{email}</p>
               </>
             )}
           </div>
@@ -76,8 +76,8 @@ const UserProfileButton = () => {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem className="gap-2 text-red-500 focus:text-red-600 cursor-pointer">
-          <LogOut size={16} />
+        <DropdownMenuItem className="gap-2 text-red-500 focus:text-red-600 cursor-pointer font-medium data-highlighted:bg-red-50 dark:data-highlighted:bg-red-900/10">
+          <LogOut size={16} color="red"/>
           Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
