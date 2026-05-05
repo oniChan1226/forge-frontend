@@ -10,9 +10,9 @@ export const useLoginMutation = () => {
   return useMutation<ApiResponse<AuthResponse>, ApiError, LoginDTO>({
     mutationFn: AuthService.login,
     onSuccess: async (data) => {
-      console.log("Login successful:", data);
       const token = data?.data?.token;
       localStorage.setItem("accessToken", token?.accessToken || "");
+      localStorage.setItem("refreshToken", token?.refreshToken || "");
       toast.success("Welcome back 👋");
       await queryClient.invalidateQueries({ queryKey: ["me"] });
     },
@@ -27,6 +27,7 @@ export const useSignupMutation = () => {
     onSuccess: async (data) => {
       const token = data?.data?.token;
       localStorage.setItem("accessToken", token?.accessToken || "");
+      localStorage.setItem("refreshToken", token?.refreshToken || "");
       toast.success("Account created successfully! 👋");
       await queryClient.invalidateQueries({ queryKey: ["me"] });
     },

@@ -31,11 +31,15 @@ apiClient.interceptors.response.use(
     if (status === 401 && code === "TOKEN_EXPIRED" && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const { data } = await apiClient.post("/auth/refresh-token");
+      const { data } = await apiClient.post("/auth/refresh-token", {
+        withCredentials: true,
+      });
+      const tokens = data?.data?.token;
 
-      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("accessToken", tokens?.accessToken || "");
+      localStorage.setItem("refreshToken", tokens?.refreshToken || "");
 
-      originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+      originalRequest.headers.Authorization = `Bearer ${tokens?.accessToken || ""}`;
 
       return apiClient(originalRequest);
     }
