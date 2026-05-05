@@ -2,17 +2,17 @@ import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
-interface LoaderProps {
+interface AppLoaderProps {
   title?: string;
   subtitle?: string;
   progress?: number;
 }
 
-export const Loader = ({
+export const AppLoader = ({
   title = "Loading...",
   subtitle,
   progress,
-}: LoaderProps) => {
+}: AppLoaderProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-xl overflow-hidden">
 

@@ -11,4 +11,9 @@ export const AuthService = {
     const res = await apiClient.post("/auth/signup", data);
     return res.data;
   },
+
+  logout: async () => {
+    const res = await apiClient.post("/auth/logout");
+    return res.data;
+  },
 };

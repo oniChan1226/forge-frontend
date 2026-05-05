@@ -10,14 +10,26 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, LogOut, User } from "lucide-react";
 import { useMeQuery } from "@/hooks/queries/useUser.queries";
 import { getInitials } from "@/utils/helpers";
+import { useLogoutMutation } from "@/hooks/mutations/useAuth.mutations";
+import Loader from "@/utils/Loader";
+import { useNavigate } from "react-router";
+import { ROUTE_PATHS } from "@/routes/route-paths";
 
 const UserProfileButton = () => {
   const { data, isLoading } = useMeQuery();
+  const logoutMutation = useLogoutMutation();
+  const navigate = useNavigate();
+
   const user = data?.data;
 
   const name = user?.name || "User";
   const email = user?.email || "guest@example.com";
   const avatar = user?.avatar;
+
+  const handleLogout = async () => {
+    await logoutMutation.mutateAsync();
+    navigate(ROUTE_PATHS.login);
+  };
 
   return (
     <DropdownMenu>
@@ -82,9 +94,16 @@ const UserProfileButton = () => {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem className="gap-2 text-red-500 focus:text-red-600 cursor-pointer font-medium data-highlighted:bg-red-50 dark:data-highlighted:bg-red-900/10">
+        <DropdownMenuItem
+          className="gap-2 text-red-500 focus:text-red-600 cursor-pointer font-medium data-highlighted:bg-red-50 dark:data-highlighted:bg-red-900/10"
+          onClick={handleLogout}
+        >
           <LogOut size={16} color="red" />
-          Logout
+          <Loader
+            isLoading={logoutMutation.isPending}
+            loadedText="Logout"
+            loadingText="logging out"
+          />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

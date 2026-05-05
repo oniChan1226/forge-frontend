@@ -33,3 +33,19 @@ export const useSignupMutation = () => {
     },
   });
 };
+
+export const useLogoutMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ApiResponse<null>, ApiError, void>({
+    mutationFn: AuthService.logout,
+    onSuccess: async () => {
+      toast.success("Logged out");
+    },
+    onSettled: async () => {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+};

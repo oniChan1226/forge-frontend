@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/custom/useAuth";
 import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { Loader } from "./loader/Loader";
+import { AppLoader } from "./loader/AppLoader";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -11,11 +11,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <Loader
-        title="Checking authentication"
-      />
-    );
+    return <AppLoader title="Checking authentication" />;
   }
 
   if (!isAuthenticated) {
@@ -33,11 +29,7 @@ export function PublicRoute({ children }: PublicRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <Loader
-        title="Loading application"
-      />
-    );
+    return <AppLoader title="Loading application" />;
   }
 
   if (isAuthenticated) {
