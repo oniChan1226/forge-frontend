@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/custom/useAuth";
 import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
+import { Loader } from "./loader/Loader";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -11,9 +12,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <h2 className="text-2xl font-semibold">Loading...</h2>
-      </div>
+      <Loader
+        title="Checking authentication"
+      />
     );
   }
 
@@ -33,11 +34,9 @@ export function PublicRoute({ children }: PublicRouteProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold">Loading...</h2>
-        </div>
-      </div>
+      <Loader
+        title="Loading application"
+      />
     );
   }
 
