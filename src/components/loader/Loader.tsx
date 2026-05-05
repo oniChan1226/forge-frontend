@@ -23,7 +23,7 @@ export const Loader = ({
       </div>
 
       {/* Loader Card */}
-      <Card className="relative w-[340px] shadow-xl border-muted/40 bg-card/90 backdrop-blur-md">
+      <Card className="relative w-85 shadow-xl border-muted/40 bg-card/90 backdrop-blur-md">
 
         <CardHeader className="flex flex-col items-center gap-3">
           <div className="relative">
