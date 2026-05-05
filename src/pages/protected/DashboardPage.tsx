@@ -1,8 +1,10 @@
 
+import DashboardTitle from "@/components/dashboard/main/DashboardTitle"
+
 export const DashboardPage = () => {
   return (
     <div>
-      Dashboard
+      <DashboardTitle />
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/sidebar/Sidebar";
 import Logo from "@/assets/logo.png";
 import Header from "@/components/dashboard/header/Header";
+import BreadcrumbNav from "@/components/breadcrumbs/Breadcrumb";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -64,6 +65,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0">
         <Header setMobileOpen={setMobileOpen} />
+
+        <div className="px-4 md:px-6 pt-6">
+          <BreadcrumbNav />
+        </div>
 
         {/* Content */}
         <main className="flex-1 p-4 md:p-6 overflow-y-auto">{children}</main>

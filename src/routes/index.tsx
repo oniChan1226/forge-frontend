@@ -5,10 +5,12 @@ import { SignupPage } from "@/pages/auth/SignupPage";
 import { DashboardPage } from "@/pages/protected/DashboardPage";
 import { AuthRoute } from "./AuthRoute";
 import { DashboardRoute } from "./DashboardRoute";
+import { ROUTE_PATHS } from "./route-paths";
+import TodoPage from "@/pages/protected/TodoPage";
 
 export const appRoutes = [
   {
-    path: "/login",
+    path: ROUTE_PATHS.login,
     element: (
       <AuthRoute>
         <LoginPage />
@@ -16,7 +18,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: "/signup",
+    path: ROUTE_PATHS.signup,
     element: (
       <AuthRoute>
         <SignupPage />
@@ -24,7 +26,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: "/dashboard",
+    path: ROUTE_PATHS.dashboard,
     element: (
       <DashboardRoute>
         <DashboardPage />
@@ -32,11 +34,15 @@ export const appRoutes = [
     ),
   },
   {
-    path: "/",
-    element: <Navigate to="/dashboard" replace />,
+    path: ROUTE_PATHS.todos,
+    element: (
+      <DashboardRoute>
+        <TodoPage />
+      </DashboardRoute>
+    ),
   },
   {
     path: "*",
-    element: <Navigate to="/dashboard" replace />,
+    element: <Navigate to={ROUTE_PATHS.dashboard} replace />,
   },
 ];

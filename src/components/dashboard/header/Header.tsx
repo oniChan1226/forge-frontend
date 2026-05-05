@@ -24,19 +24,19 @@ const Header = ({ setMobileOpen }: HeaderProps) => {
         <div className="left relative">
           <Search
             size={18}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2"
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-muted-foreground"
           />
           <Input
             type="text"
-            placeholder="Search..."
-            className="w-64 sm:w-96 pl-3 pr-10"
+            placeholder="Search projects, tasks or people"
+            className="w-64 sm:w-96 lg:w-125 pr-3 pl-10 rounded-sm!"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           ></Input>
         </div>
         <div className="right flex items-center justify-center">
           {/* Notification Bell */}
-          <div className="">
+          <div className="relative">
             <Bell size={18} />
           </div>
           {/* User Profile */}

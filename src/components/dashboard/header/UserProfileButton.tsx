@@ -37,7 +37,11 @@ const UserProfileButton = () => {
       </DropdownMenuTrigger>
 
       {/* Content */}
-      <DropdownMenuContent align="end" sideOffset={8} className="w-56">
+      <DropdownMenuContent
+        align="end"
+        sideOffset={8}
+        className="w-56 animate-in fade-in zoom-in-95"
+      >
         {/* User Info */}
         <div className="flex items-center gap-3 p-2">
           <Avatar className="w-9 h-9">
@@ -55,7 +59,9 @@ const UserProfileButton = () => {
               </>
             ) : (
               <>
-                <p className="font-medium text-sm capitalize truncate">{name}</p>
+                <p className="font-medium text-sm capitalize truncate">
+                  {name}
+                </p>
                 <p className="text-xs text-gray-500 truncate">{email}</p>
               </>
             )}
@@ -77,7 +83,7 @@ const UserProfileButton = () => {
         <DropdownMenuSeparator />
 
         <DropdownMenuItem className="gap-2 text-red-500 focus:text-red-600 cursor-pointer font-medium data-highlighted:bg-red-50 dark:data-highlighted:bg-red-900/10">
-          <LogOut size={16} color="red"/>
+          <LogOut size={16} color="red" />
           Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
