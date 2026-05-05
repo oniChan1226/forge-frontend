@@ -8,5 +8,6 @@ export const useMeQuery = () => {
     queryKey: ["me"],
     queryFn: UserService.me,
     retry: false,
+    staleTime: Infinity,
   });
 };

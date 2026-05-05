@@ -1,12 +1,14 @@
 import { useMeQuery } from "../queries/useUser.queries";
 
 export const useAuth = () => {
-  const { data, isLoading, isError } = useMeQuery();
+  const { data, isLoading, isError, isSuccess } = useMeQuery();
+  const user = data?.data;
 
   return {
-    user: data,
-    isAuthenticated: !!data,
+    user,
+    isAuthenticated: !!user && !isError && isSuccess,
     isLoading,
     isError,
+    isSuccess,
   };
 };

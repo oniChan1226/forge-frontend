@@ -13,6 +13,7 @@ import { getInitials } from "@/utils/helpers";
 import { useLogoutMutation } from "@/hooks/mutations/useAuth.mutations";
 import Loader from "@/utils/Loader";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import { ROUTE_PATHS } from "@/routes/route-paths";
 
 const UserProfileButton = () => {
@@ -27,8 +28,13 @@ const UserProfileButton = () => {
   const avatar = user?.avatar;
 
   const handleLogout = async () => {
-    await logoutMutation.mutateAsync();
-    navigate(ROUTE_PATHS.login);
+    try {
+      await logoutMutation.mutateAsync();
+    } catch {
+      toast.error("Logout request failed, but local session was cleared");
+    } finally {
+      navigate(ROUTE_PATHS.login, { replace: true });
+    }
   };
 
   return (

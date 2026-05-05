@@ -9,10 +9,7 @@ export const useLoginMutation = () => {
 
   return useMutation<ApiResponse<AuthResponse>, ApiError, LoginDTO>({
     mutationFn: AuthService.login,
-    onSuccess: async (data) => {
-      const token = data?.data?.token;
-      localStorage.setItem("accessToken", token?.accessToken || "");
-      localStorage.setItem("refreshToken", token?.refreshToken || "");
+    onSuccess: async () => {
       toast.success("Welcome back 👋");
       await queryClient.invalidateQueries({ queryKey: ["me"] });
     },
@@ -24,10 +21,7 @@ export const useSignupMutation = () => {
 
   return useMutation<ApiResponse<AuthResponse>, ApiError, SignupDTO>({
     mutationFn: AuthService.signup,
-    onSuccess: async (data) => {
-      const token = data?.data?.token;
-      localStorage.setItem("accessToken", token?.accessToken || "");
-      localStorage.setItem("refreshToken", token?.refreshToken || "");
+    onSuccess: async () => {
       toast.success("Account created successfully! 👋");
       await queryClient.invalidateQueries({ queryKey: ["me"] });
     },
@@ -39,13 +33,13 @@ export const useLogoutMutation = () => {
 
   return useMutation<ApiResponse<null>, ApiError, void>({
     mutationFn: AuthService.logout,
+    onSettled: async () => {
+      await queryClient.cancelQueries({ queryKey: ["me"] });
+      queryClient.removeQueries({ queryKey: ["me"] });
+      queryClient.invalidateQueries();
+    },
     onSuccess: async () => {
       toast.success("Logged out");
-    },
-    onSettled: async () => {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      await queryClient.invalidateQueries({ queryKey: ["me"] });
     },
   });
 };
