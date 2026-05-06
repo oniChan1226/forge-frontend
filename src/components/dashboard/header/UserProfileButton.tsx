@@ -42,7 +42,7 @@ const UserProfileButton = () => {
       {/* Trigger */}
       <DropdownMenuTrigger asChild>
         <button
-          className="ml-4 flex items-center gap-2 rounded-full hover:bg-gray-100 p-1 transition"
+          className="flex items-center gap-2 rounded-full hover:bg-gray-100 p-1 transition"
           disabled={isLoading}
         >
           <Avatar className="w-8 h-8">

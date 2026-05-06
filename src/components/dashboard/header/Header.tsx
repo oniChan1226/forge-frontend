@@ -34,10 +34,10 @@ const Header = ({ setMobileOpen }: HeaderProps) => {
             onChange={(e) => setSearch(e.target.value)}
           ></Input>
         </div>
-        <div className="right flex items-center justify-center">
+        <div className="right flex items-center justify-center gap-x-2">
           {/* Notification Bell */}
-          <div className="relative">
-            <Bell size={18} />
+          <div className="relative ">
+            <Bell size={20} />
           </div>
           {/* User Profile */}
           <UserProfileButton />

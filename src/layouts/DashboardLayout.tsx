@@ -14,7 +14,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Overlay (mobile) */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 md:hidden"
+          className="fixed inset-0 z-40 md:hidden bg-black/10 backdrop-blur-xs"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -50,7 +50,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Mobile Sidebar */}
       <aside
         className={`fixed md:hidden z-50 top-0 left-0 h-full w-72 border-r shadow-lg transform transition-transform duration-300
-        ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+        ${mobileOpen ? "translate-x-0 bg-sidebar-primary-mobile" : "-translate-x-full"}`}
       >
         <div className="h-16 flex items-center justify-between px-4 border-b">
           <span className="font-bold text-lg">Forge</span>
@@ -66,12 +66,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 flex flex-col min-w-0">
         <Header setMobileOpen={setMobileOpen} />
 
-        <div className="px-4 md:px-6 pt-6">
+        <div className="px-3 pt-2 md:px-4 md:pt-3">
           <BreadcrumbNav />
         </div>
 
         {/* Content */}
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto">{children}</main>
+        <main className="flex-1 p-3 md:p-4 overflow-y-auto">{children}</main>
       </div>
     </div>
   );
