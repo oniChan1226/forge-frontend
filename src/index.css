@@ -49,70 +49,82 @@
 }
 
 :root {
-  /* Base Colors - Clean White/Gray for Light Mode */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  /* Sahara Light Theme - Warm Sand Base */
+  --background: oklch(0.97 0.01 85); /* soft sand */
+  --foreground: oklch(0.22 0.02 45);  /* deep desert brown */
 
-  /* Brand Colors (Forge Amber) */
-  --primary: oklch(0.769 0.188 70); /* Warm Amber */
-  --primary-foreground: oklch(0.205 0 0);
+  --card: oklch(0.985 0.01 85);
+  --card-foreground: oklch(0.22 0.02 45);
 
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.769 0.188 70);
+  --popover: oklch(0.985 0.01 85);
+  --popover-foreground: oklch(0.22 0.02 45);
 
-  --radius: 0.75rem; /* Matches the rounded cards in the image */
+  /* Sahara Accent - Clay / Sunset Orange */
+  --primary: oklch(0.65 0.16 55); /* warm clay orange */
+  --primary-foreground: oklch(0.98 0 0);
+
+  /* Soft desert neutrals */
+  --secondary: oklch(0.94 0.01 80);
+  --secondary-foreground: oklch(0.25 0.02 45);
+
+  --muted: oklch(0.94 0.01 80);
+  --muted-foreground: oklch(0.45 0.02 60);
+
+  --accent: oklch(0.92 0.015 75);
+  --accent-foreground: oklch(0.25 0.02 45);
+
+  --destructive: oklch(0.6 0.18 25);
+
+  /* Borders - sand dust feel */
+  --border: oklch(0.88 0.015 75);
+  --input: oklch(0.88 0.015 75);
+
+  --ring: oklch(0.65 0.16 55);
+
+  --radius: 0.75rem;
 }
 
 .dark {
-  /* Deep Obsidian Background */
-  --background: oklch(0.12 0.01 250);
-  --foreground: oklch(0.98 0 0);
+  /* Sahara Night - Desert at dusk */
+  --background: oklch(0.18 0.02 50);  /* deep sand night */
+  --foreground: oklch(0.92 0.01 85);  /* warm light sand text */
 
-  /* Elevated Surface (Cards) */
-  --card: oklch(0.16 0.012 250);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.16 0.012 250);
-  --popover-foreground: oklch(0.98 0 0);
+  --card: oklch(0.22 0.02 50);
+  --card-foreground: oklch(0.92 0.01 85);
 
-  /* Forge Amber Accents */
-  --primary: oklch(0.769 0.188 70);
-  --primary-foreground: oklch(0.12 0.01 250);
+  --popover: oklch(0.22 0.02 50);
+  --popover-foreground: oklch(0.92 0.01 85);
 
-  /* Muted UI Elements */
-  --secondary: oklch(0.22 0.015 250);
-  --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.22 0.015 250);
-  --muted-foreground: oklch(0.65 0.01 250);
+  /* Clay glow accent */
+  --primary: oklch(0.7 0.17 55);
+  --primary-foreground: oklch(0.18 0.02 50);
 
-  /* Borders & Interaction */
-  --accent: oklch(0.25 0.02 250);
-  --accent-foreground: oklch(0.98 0 0);
+  /* Muted desert shadows */
+  --secondary: oklch(0.26 0.02 50);
+  --secondary-foreground: oklch(0.92 0.01 85);
+
+  --muted: oklch(0.26 0.02 50);
+  --muted-foreground: oklch(0.65 0.02 70);
+
+  --accent: oklch(0.28 0.02 50);
+  --accent-foreground: oklch(0.92 0.01 85);
+
   --destructive: oklch(0.65 0.2 30);
+
+  /* Subtle sand borders */
   --border: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 10%);
-  --ring: oklch(0.769 0.188 70 / 40%);
+  --ring: oklch(0.7 0.17 55);
 
-  /* Sidebar Specifics */
-  --sidebar: oklch(0.14 0.01 250);
-  --sidebar-foreground: oklch(0.85 0.01 250);
-  --sidebar-primary: oklch(0.769 0.188 70);
-  --sidebar-primary-foreground: oklch(0.12 0.01 250);
-  --sidebar-accent: oklch(0.2 0.015 250);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
+  /* Sidebar - darker desert rock */
+  --sidebar: oklch(0.2 0.02 50);
+  --sidebar-foreground: oklch(0.88 0.01 85);
+  --sidebar-primary: oklch(0.7 0.17 55);
+  --sidebar-primary-foreground: oklch(0.18 0.02 50);
+  --sidebar-accent: oklch(0.25 0.02 50);
+  --sidebar-accent-foreground: oklch(0.92 0.01 85);
   --sidebar-border: oklch(1 0 0 / 5%);
-  --sidebar-ring: oklch(0.769 0.188 70);
+  --sidebar-ring: oklch(0.7 0.17 55);
 }
 
 @layer base {
