@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 export const Sidebar = ({ collapsed }: { collapsed?: boolean }) => {
   return (
-    <nav className="p-2 space-y-1">
+    <nav className="p-2 space-y-1 font-base">
       {sidebarRoutes.map((item) => {
         const Icon = item.icon;
 

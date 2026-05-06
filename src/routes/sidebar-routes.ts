@@ -15,6 +15,11 @@ export const sidebarRoutes = [
     icon: LayoutDashboard,
   },
   {
+    label: "Todos",
+    to: "/todos",
+    icon: ListTodo,
+  },
+  {
     label: "Tasks",
     to: "/tasks",
     icon: CheckSquare,
@@ -28,11 +33,6 @@ export const sidebarRoutes = [
     label: "Calendar",
     to: "/calendar",
     icon: CalendarDays,
-  },
-  {
-    label: "Todos",
-    to: "/todos",
-    icon: ListTodo,
   },
   {
     label: "Settings",

@@ -21,7 +21,7 @@ export const StatsCard = ({
         {/* Left side */}
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">{label}</p>
-          <h3 className="text-2xl font-semibold">{value}</h3>
+          <h3 className="text-2xl font-semibold font-eb-garamond">{value}</h3>
         </div>
 
         {/* Icon */}

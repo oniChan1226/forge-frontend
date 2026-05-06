@@ -9,7 +9,7 @@ const DashboardTitle = ({ className }: DashboardTitleProps) => {
   const user = data?.data;
   return (
     <div className={className}>
-      <h1 className="text-xl sm:text-2xl font-bold capitalize max-w-96 text-wrap truncate">
+      <h1 className="text-xl sm:text-2xl font-bold capitalize max-w-96 text-wrap truncate font-eb-garamond">
         Good morning, {isLoading ? "Loading..." : user?.name || "there"}
         <span className="text-xl pl-2 inline-block animate-bounce">👋</span>
       </h1>

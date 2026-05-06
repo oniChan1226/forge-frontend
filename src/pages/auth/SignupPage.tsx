@@ -118,7 +118,7 @@ export const SignupPage = () => {
               <Loader
                 isLoading={signupMutation.isPending}
                 loadingText="Creating account..."
-                loadedText="Create account"
+                loadedText="Join the Workspace"
               />
             </Button>
           </form>

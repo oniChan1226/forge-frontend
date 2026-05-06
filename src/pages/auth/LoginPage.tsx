@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Mail, Lock} from "lucide-react";
+import { Mail, Lock } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,16 +10,26 @@ import { useLoginMutation } from "@/hooks/mutations/useAuth.mutations";
 import { Link } from "react-router-dom";
 import Loader from "@/utils/Loader";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
+import type { LoginDTO } from "@/types/services/auth";
+import { loginSchema } from "@/schemas/auth/auth";
 
 export const LoginPage = () => {
   const loginMutation = useLoginMutation();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginDTO>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    loginMutation.mutate({ email, password });
+  const onSubmit = (data: LoginDTO) => {
+    loginMutation.mutate(data);
   };
 
   return (
@@ -32,7 +43,6 @@ export const LoginPage = () => {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* OAuth */}
           <div className="space-y-3">
             <OAuthButtons />
 
@@ -45,8 +55,8 @@ export const LoginPage = () => {
             </div>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* FORM */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -56,15 +66,21 @@ export const LoginPage = () => {
                   className="absolute left-3 top-2.5 text-muted-foreground"
                   size={18}
                 />
+
                 <Input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
                   className="pl-10"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register("email")}
                 />
               </div>
+
+              {errors.email && (
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             {/* Password */}
@@ -76,15 +92,21 @@ export const LoginPage = () => {
                   className="absolute left-3 top-2.5 text-muted-foreground"
                   size={18}
                 />
+
                 <Input
                   id="password"
                   type="password"
                   placeholder="••••••••"
                   className="pl-10"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password")}
                 />
               </div>
+
+              {errors.password && (
+                <p className="text-sm text-destructive">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             {/* Submit */}
@@ -96,17 +118,18 @@ export const LoginPage = () => {
               <Loader
                 isLoading={loginMutation.isPending}
                 loadingText="Signing in..."
-                loadedText="Sign in"
+                loadedText="Sign in to Workspace"
               />
             </Button>
 
-            {/* Error */}
+            {/* API Error */}
             {loginMutation.isError && (
               <p className="text-sm text-destructive text-center">
                 Invalid email or password
               </p>
             )}
           </form>
+
           <div className="text-center pt-2">
             <p className="text-sm text-muted-foreground">
               Don’t have an account?{" "}

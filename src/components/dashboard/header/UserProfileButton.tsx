@@ -58,7 +58,7 @@ const UserProfileButton = () => {
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        className="w-56 animate-in fade-in zoom-in-95"
+        className="w-56 animate-in fade-in zoom-in-95 font-sans"
       >
         {/* User Info */}
         <div className="flex items-center gap-3 p-2">

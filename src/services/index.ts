@@ -22,7 +22,7 @@ apiClient.interceptors.response.use(
     console.log("API error:", { response: error.response, status, code });
 
     // only refresh if token expired
-    if (status === 401 && code === "TOKEN_EXPIRED" && !originalRequest._retry) {
+    if (status === 401 && (code === "TOKEN_EXPIRED" || code === "ACCESS_TOKEN_MISSING") && !originalRequest._retry) {
       originalRequest._retry = true;
 
       await apiClient.post("/auth/refresh-token", {
