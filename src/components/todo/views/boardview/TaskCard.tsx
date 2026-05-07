@@ -1,8 +1,14 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import * as motion from "motion/react-client";
+import type { Task } from "../view-config";
 
-export default function TaskCard({ task, isOverlay = false }) {
+interface TaskCardProps {
+  task: Task;
+  isOverlay?: boolean;
+}
+
+export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: task.id,

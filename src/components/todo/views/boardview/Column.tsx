@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import TaskCard from "./TaskCard";
 import { useDroppable } from "@dnd-kit/core";
-import type { ColumnStatus } from "../view-config";
+import type { ColumnStatus, Task } from "../view-config";
 
 const statusStyles: Record<ColumnStatus, string> = {
   backlog: "bg-status-backlog/20 text-black dark:text-white",
@@ -12,7 +12,7 @@ const statusStyles: Record<ColumnStatus, string> = {
 
 interface ColumnProps {
   status: ColumnStatus;
-  tasks: any[];
+  tasks: Task[];
 }
 
 export default function Column({ status, tasks }: ColumnProps) {
