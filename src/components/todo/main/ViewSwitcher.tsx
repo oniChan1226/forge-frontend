@@ -3,8 +3,8 @@ import { motion } from "motion/react";
 import { List, LayoutGrid, CalendarDays, Flame } from "lucide-react";
 
 const views = [
-  { id: "list", name: "List", icon: List },
   { id: "board", name: "Board", icon: LayoutGrid },
+  { id: "list", name: "List", icon: List },
   { id: "calendar", name: "Calendar", icon: CalendarDays },
   { id: "priority", name: "Priority", icon: Flame },
 ] as const;
@@ -18,7 +18,7 @@ type Props = {
 
 export const ViewSwitcher = ({ value, onChange }: Props) => {
   return (
-    <div className="inline-flex items-center rounded-lg bg-accent p-1 relative">
+    <div className="flex flex-wrap sm:flex-nowrap items-center rounded-lg bg-accent p-1 relative w-fit">
       {views.map((view) => {
         const isActive = value === view.id;
         const Icon = view.icon;

@@ -66,12 +66,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 flex flex-col min-w-0">
         <Header setMobileOpen={setMobileOpen} />
 
-        <div className="px-3 pt-2 md:px-4 md:pt-3">
+        <div className="px-3 pt-2 md:px-5 md:pt-4">
           <BreadcrumbNav />
         </div>
 
         {/* Content */}
-        <main className="flex-1 p-3 md:p-4 overflow-y-auto">{children}</main>
+        <main className="flex-1 pt-4 px-3 md:px-5 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

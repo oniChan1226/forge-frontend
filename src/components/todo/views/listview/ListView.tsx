@@ -1,9 +1,8 @@
-import React from 'react'
 
 const ListView = () => {
   return (
     <div>
-      List View
+      List View - Coming Soon!
     </div>
   )
 }

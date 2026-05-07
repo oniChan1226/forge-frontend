@@ -54,7 +54,7 @@ export default function BoardView() {
   const handleDragCancel = () => setActiveTask(null);
 
   return (
-    <div className="h-screen w-full pt-6 md:pt-12">
+    <div className="w-full pt-6 md:pt-12">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}

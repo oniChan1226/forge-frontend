@@ -25,7 +25,7 @@ export default function Column({ status, tasks }: ColumnProps) {
   };
 
   return (
-    <div className="w-72 ">
+    <div className="min-w-44 w-full">
       <div className="flex items-center justify-between mb-3">
         <div className="flex space-x-2 items-center">
           <h2 className="text-base font-semibold capitalize">{status}</h2>

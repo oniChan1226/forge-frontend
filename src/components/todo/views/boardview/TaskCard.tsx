@@ -6,7 +6,7 @@ export default function TaskCard({ task, isOverlay = false }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: task.id,
-      disabled: isOverlay, // important fix
+      disabled: isOverlay,
     });
 
   const style = {
@@ -15,28 +15,33 @@ export default function TaskCard({ task, isOverlay = false }) {
 
   return (
     <motion.div
+      layout
       ref={isOverlay ? undefined : setNodeRef}
       {...(isOverlay ? {} : listeners)}
       {...(isOverlay ? {} : attributes)}
       style={isOverlay ? {} : style}
-      className={`p-3 rounded-lg border bg-white/80 dark:bg-card text-card-foreground border-border ${
-        isOverlay
-          ? "cursor-grabbing shadow-xl"
-          : "cursor-grab active:cursor-grabbing"
-      }`}
-      animate={
-        isOverlay
-          ? { scale: 1.05 }
-          : {
-              scale: isDragging ? 0.95 : 1,
-              opacity: isDragging ? 0.4 : 1,
-            }
-      }
-      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      whileHover={!isDragging && !isOverlay ? { y: -1 } : undefined}
+      animate={{
+        scale: isDragging ? 0.98 : 1,
+        opacity: isDragging ? 0.5 : 1,
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 500,
+        damping: 35,
+      }}
+      className={`
+        rounded-sm border border-transparent hover:border-primary/20 bg-white/70 dark:bg-card p-3 text-card-foreground backdrop-blur-sm select-none will-change-transform
+        ${
+          isOverlay
+            ? "shadow-xl cursor-grabbing"
+            : "shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing"
+        }
+      `}
     >
-      <p className="text-sm">{task.title}</p>
+      <p className="text-sm font-medium">{task.title}</p>
 
-      <div className="flex justify-between mt-2 text-xs text-neutral-500">
+      <div className="mt-3 flex items-center justify-between text-xs text-neutral-500">
         <span>Low priority</span>
         <span>Today</span>
       </div>
