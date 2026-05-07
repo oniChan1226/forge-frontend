@@ -14,15 +14,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Overlay (mobile) */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 md:hidden bg-black/10 backdrop-blur-xs"
+          className="fixed inset-0 z-40 lg:hidden bg-black/10 backdrop-blur-xs"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Sidebar (desktop) */}
       <aside
-        className={`hidden md:flex flex-col border-r shadow-sm transition-all duration-300
-        ${collapsed ? "w-20" : "w-64"}`}
+        className={`hidden lg:flex flex-col border-r shadow-sm transition-all duration-300
+        ${collapsed ? "w-16" : "w-52"}`}
       >
         {/* Logo / Header */}
         <div className="h-16 flex items-center justify-between px-4">
@@ -49,7 +49,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
       {/* Mobile Sidebar */}
       <aside
-        className={`fixed md:hidden z-50 top-0 left-0 h-full w-72 border-r shadow-lg transform transition-transform duration-300
+        className={`fixed lg:hidden z-50 top-0 left-0 h-full w-72 border-r shadow-lg transform transition-transform duration-300
         ${mobileOpen ? "translate-x-0 bg-sidebar-primary-mobile" : "-translate-x-full"}`}
       >
         <div className="h-16 flex items-center justify-between px-4 border-b">

@@ -14,7 +14,7 @@ const Header = ({ setMobileOpen }: HeaderProps) => {
     <header className="h-16 border-b flex items-center justify-between px-4 md:px-6">
       {/* Mobile menu button */}
       <button
-        className="md:hidden p-2 rounded"
+        className="lg:hidden p-2 rounded"
         onClick={() => setMobileOpen(true)}
       >
         <Menu />

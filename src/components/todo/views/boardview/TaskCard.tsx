@@ -19,8 +19,10 @@ export default function TaskCard({ task, isOverlay = false }) {
       {...(isOverlay ? {} : listeners)}
       {...(isOverlay ? {} : attributes)}
       style={isOverlay ? {} : style}
-      className={`p-3 rounded-lg border bg-neutral-800 border-neutral-700 ${
-        isOverlay ? "cursor-grabbing shadow-xl" : "cursor-grab active:cursor-grabbing"
+      className={`p-3 rounded-lg border bg-white/80 dark:bg-card text-card-foreground border-border ${
+        isOverlay
+          ? "cursor-grabbing shadow-xl"
+          : "cursor-grab active:cursor-grabbing"
       }`}
       animate={
         isOverlay

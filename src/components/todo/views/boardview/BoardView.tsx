@@ -10,15 +10,14 @@ import {
 
 import Column from "@/components/todo/views/boardview/Column";
 import TaskCard from "@/components/todo/views/boardview/TaskCard";
+import { columns } from "../view-config";
 
 const initialTasks = [
   { id: "1", title: "Setup auth", status: "backlog" },
-  { id: "2", title: "Design UI", status: "todo" },
-  { id: "3", title: "Fix bugs", status: "doing" },
+  { id: "2", title: "Design UI", status: "in-progress" },
+  { id: "3", title: "Fix bugs", status: "in-review" },
   { id: "4", title: "Deploy app", status: "done" },
 ];
-
-const columns = ["backlog", "todo", "doing", "done"];
 
 export default function BoardView() {
   const [tasks, setTasks] = useState(initialTasks);
@@ -27,7 +26,7 @@ export default function BoardView() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
-    })
+    }),
   );
 
   const handleDragStart = (event) => {
@@ -47,8 +46,8 @@ export default function BoardView() {
 
     setTasks((prev) =>
       prev.map((task) =>
-        task.id === taskId ? { ...task, status: newStatus } : task
-      )
+        task.id === taskId ? { ...task, status: newStatus } : task,
+      ),
     );
   };
 
