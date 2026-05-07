@@ -1,4 +1,4 @@
-import TaskCard from "../TaskCard";
+import TaskCard from "./TaskCard";
 import { useDroppable } from "@dnd-kit/core";
 
 export default function Column({ status, tasks }) {

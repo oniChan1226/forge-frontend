@@ -8,8 +8,8 @@ import {
   DragOverlay,
 } from "@dnd-kit/core";
 
-import Column from "@/components/todo/boardview/Column";
-import TaskCard from "@/components/todo/boardview/TaskCard";
+import Column from "@/components/todo/views/boardview/Column";
+import TaskCard from "@/components/todo/views/boardview/TaskCard";
 
 const initialTasks = [
   { id: "1", title: "Setup auth", status: "backlog" },
@@ -20,7 +20,7 @@ const initialTasks = [
 
 const columns = ["backlog", "todo", "doing", "done"];
 
-export default function Board() {
+export default function BoardView() {
   const [tasks, setTasks] = useState(initialTasks);
   const [activeTask, setActiveTask] = useState(null);
 
@@ -55,14 +55,7 @@ export default function Board() {
   const handleDragCancel = () => setActiveTask(null);
 
   return (
-    <div className="h-screen w-full bg-neutral-950 text-white p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Tasks Board</h1>
-        <p className="text-sm text-neutral-400">
-          Drag, drop, and organize your workflow
-        </p>
-      </div>
-
+    <div className="h-screen w-full pt-6 md:pt-12">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
