@@ -3,3 +3,8 @@ export interface BaseErrorResponnse {
   stack?: string;
   success: boolean;
 }
+
+export type TimeStamps = {
+  createdAt: string;
+  updatedAt: string;
+}

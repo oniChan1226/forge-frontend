@@ -7,7 +7,10 @@
 
 @theme inline {
   --font-heading: var(--font-manrope);
-  --font-sans: "Manrope", Garamond, Baskerville, "Times New Roman", serif;
+  --font-sans:
+    "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", sans-serif;
   --font-eb-garamond:
     "EB Garamond", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji",
@@ -38,6 +41,7 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -78,6 +82,7 @@
 
   /* Sahara Accent - Clay / Sunset Orange */
   --primary: oklch(0.62 0.15 45.5); /* warm clay orange */
+  --primary-dark: oklch(60.014% 0.1538 45.24);
   --primary-foreground: oklch(0.98 0 0);
 
   /* Soft desert neutrals */
@@ -179,6 +184,5 @@
   }
   html {
     @apply font-sans;
-    font-family: "EB Garamond", Garamond, Baskerville, "Times New Roman", serif;
   }
 }
