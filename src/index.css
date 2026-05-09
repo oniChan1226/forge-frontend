@@ -65,6 +65,9 @@
   --color-status-in-progress-foreground: var(--status-in-progress-foreground);
   --color-status-in-review-foreground: var(--status-in-review-foreground);
   --color-status-done-foreground: var(--status-done-foreground);
+
+  --color-tag-background: var(--tag-background);
+  --color-tag-foreground: var(--tag-foreground);
 }
 
 :root {
@@ -117,6 +120,10 @@
 
   --status-done: oklch(0.55 0.1 160); /* oasis green */
   --status-done-foreground: oklch(0.98 0 0);
+
+  --tag-foreground: oklch(0.62 0.15 45.5);
+  --tag-background: oklch(0.62 0.15 45.5 / 0.12);
+
 }
 
 .dark {

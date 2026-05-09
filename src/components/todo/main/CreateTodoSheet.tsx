@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { Field, FieldGroup } from "@/components/ui/field";
-import NotionLikeEditor from "./MarkdownTagInput";
+import TagInputEditor from "./TagInput";
 
 interface CreateTodoSheetProps {
   isOpen: boolean;
@@ -74,18 +74,21 @@ export function CreateTodoSheet({ isOpen, onClose }: CreateTodoSheetProps) {
                 placeholder="what needs to be done?"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                maxLength={100}
               />
             </div>
 
             {/* DESCRIPTION */}
             <div className="space-y-2">
               <Label>Description</Label>
-              <NotionLikeEditor
+              <TagInputEditor
                 value={description}
                 onChange={(value, extractedTags) => {
                   setDescription(value);
                   setTags(extractedTags);
                 }}
+                maxLength={5000}
+                maxWords={100}
               />
             </div>
 
