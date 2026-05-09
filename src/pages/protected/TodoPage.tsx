@@ -4,8 +4,8 @@ import ViewRenderer from "@/components/todo/views/ViewRenderer";
 import { useSearchParams } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
-import { CreateTodoSheet } from "@/components/todo/main/CreateTodoSheet";
+import { useEffect, useState } from "react";
+import { CreateTodoModal } from "@/components/todo/main/CreateTodoSheet";
 import { TooltipWrapper } from "@/components/generic/TooltipWrapper";
 
 const TodoPage = () => {
@@ -14,6 +14,42 @@ const TodoPage = () => {
   const currentView = (searchParams.get("view") as ViewId) || "board";
 
   const [isOpen, setOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
+      const isMac = navigator.platform.toLowerCase().includes("mac");
+
+      const isShortcut = isMac
+        ? e.metaKey && e.key === "Enter"
+        : e.ctrlKey && e.key === "Enter";
+
+      if (!isShortcut) return;
+
+      const target = e.target as HTMLElement;
+
+      // prevent triggering while typing in inputs/textareas/contentEditable
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        console.log("Shortcut pressed inside an input, ignoring.");
+        return;
+      }
+
+      e.preventDefault();
+      setOpen(true);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const onViewChange = (view: ViewId) => {
     setSearchParams((prev) => {
@@ -38,7 +74,7 @@ const TodoPage = () => {
         <ViewRenderer view={currentView} />
       </div>
 
-      <TooltipWrapper tip="Create todo">
+      <TooltipWrapper tip="Ctrl + N">
         <motion.button
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -51,7 +87,7 @@ const TodoPage = () => {
           />
         </motion.button>
       </TooltipWrapper>
-      <CreateTodoSheet isOpen={isOpen} onClose={() => setOpen(false)} />
+      <CreateTodoModal isOpen={isOpen} onClose={() => setOpen(false)} />
     </div>
   );
 };

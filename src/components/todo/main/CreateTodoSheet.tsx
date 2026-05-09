@@ -1,33 +1,57 @@
 import { useState } from "react";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { Field, FieldGroup } from "@/components/ui/field";
-import TagInputEditor from "./TagInput";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-interface CreateTodoSheetProps {
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { TagEditor } from "./TagInput";
+
+interface CreateTodoModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function CreateTodoSheet({ isOpen, onClose }: CreateTodoSheetProps) {
+const PRIORITIES = ["low", "medium", "high", "urgent"] as const;
+
+export function CreateTodoModal({
+  isOpen,
+  onClose,
+}: CreateTodoModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
-  const [priority, setPriority] = useState("low");
+  const [priority, setPriority] =
+    useState<(typeof PRIORITIES)[number]>("low");
   const [status, setStatus] = useState("backlog");
-  const [dueDate, setDueDate] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [dueDate, setDueDate] = useState<Date | undefined>();
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,122 +61,117 @@ export function CreateTodoSheet({ isOpen, onClose }: CreateTodoSheetProps) {
       description,
       priority,
       status,
-      dueDate: dueDate ? new Date(dueDate) : null,
+      dueDate: dueDate ?? null,
       tags,
     };
 
     console.log(payload);
-
     onClose();
   }
 
   return (
-    <Sheet
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-    >
-      <SheetContent className="w-full font-sans md:min-w-lg sm:max-w-xl overflow-y-auto px-4">
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <SheetHeader className="px-0 gap-1">
-            <SheetTitle className="text-xl">Create Todo</SheetTitle>
-            <SheetDescription className="text-xs">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-lg">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <DialogHeader>
+            <DialogTitle>Create Todo</DialogTitle>
+            <DialogDescription>
               Add a new task to your workflow
-            </SheetDescription>
-          </SheetHeader>
+            </DialogDescription>
+          </DialogHeader>
 
-          <div className="mt-6 space-y-5 flex-1">
-            {/* TITLE */}
-            <div className="space-y-2">
-              <Label>
-                <span>
-                  Title <span className="text-red-500">*</span>
-                </span>
-              </Label>
-              <Input
-                placeholder="what needs to be done?"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                maxLength={100}
-              />
-            </div>
+          {/* TITLE */}
+          <div className="space-y-2">
+            <Label>
+              Title <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              placeholder="What needs to be done?"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={100}
+            />
+          </div>
 
-            {/* DESCRIPTION */}
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <TagInputEditor
-                value={description}
-                onChange={(value, extractedTags) => {
-                  setDescription(value);
-                  setTags(extractedTags);
-                }}
-                maxLength={5000}
-                maxWords={100}
-              />
-            </div>
+          {/* DESCRIPTION */}
+          <div className="space-y-2">
+            <Label>Description</Label>
+            <TagEditor
+              value={description}
+              onChange={(newValue, newTags) => {
+                setDescription(newValue);
+                setTags(newTags);
+              }}
+            />
+          </div>
 
-            {/* PRIORITY + STATUS */}
-            <FieldGroup>
-              <Field>
-                <Label>Priority</Label>
-                <select
-                  className="w-full border rounded-md p-2"
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
+          {/* PRIORITY */}
+          <div className="space-y-2">
+            <Label>Priority</Label>
+            <div className="flex gap-2 flex-wrap">
+              {PRIORITIES.map((p) => (
+                <Badge
+                  key={p}
+                  onClick={() => setPriority(p)}
+                  className={cn(
+                    "cursor-pointer capitalize transition",
+                    priority === p
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-accent"
+                  )}
                 >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
-                </select>
-              </Field>
-
-              <Field>
-                <Label>Status</Label>
-                <select
-                  className="w-full border rounded-md p-2"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="backlog">Backlog</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="in-review">In Review</option>
-                  <option value="done">Done</option>
-                </select>
-              </Field>
-            </FieldGroup>
-
-            {/* TAGS */}
-            <div className="space-y-2">
-              <Label>Tags (comma separated)</Label>
-              <Input
-                placeholder="frontend, backend, bug"
-                value={tags.join(", ")}
-                onChange={(e) => setTags(e.target.value.split(",").map((t) => t.trim()))}
-              />
-            </div>
-
-            {/* DUE DATE */}
-            <div className="space-y-2">
-              <Label>Due Date</Label>
-              <Input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
+                  {p}
+                </Badge>
+              ))}
             </div>
           </div>
 
-          <SheetFooter className="mt-6">
+          {/* STATUS */}
+          <div className="space-y-2">
+            <Label>Status</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="backlog">Backlog</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="in-review">In Review</SelectItem>
+                <SelectItem value="done">Done</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* DUE DATE */}
+          <div className="space-y-2">
+            <Label>Due Date</Label>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-start">
+                  {dueDate ? format(dueDate, "PPP") : "Pick a due date"}
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={dueDate}
+                  onSelect={setDueDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <DialogFooter className="flex gap-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-
             <Button type="submit">Create Todo</Button>
-          </SheetFooter>
+          </DialogFooter>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

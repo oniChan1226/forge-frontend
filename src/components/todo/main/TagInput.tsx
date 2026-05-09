@@ -26,7 +26,7 @@ const countWords = (text: string) => {
   return text.trim().split(/\s+/).filter(Boolean).length;
 };
 
-export default function TagEditor({
+export function TagEditor({
   value,
   onChange,
   maxWords = 100,
