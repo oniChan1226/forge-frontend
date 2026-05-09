@@ -74,7 +74,7 @@ const TodoPage = () => {
         <ViewRenderer view={currentView} />
       </div>
 
-      <TooltipWrapper tip="Ctrl + N">
+      <TooltipWrapper tip="Ctrl + Enter">
         <motion.button
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
