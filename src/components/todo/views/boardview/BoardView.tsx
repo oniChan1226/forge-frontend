@@ -10,24 +10,49 @@ import {
   type DragEndEvent,
   type DragCancelEvent,
 } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 
 import Column from "@/components/todo/views/boardview/Column";
 import TaskCard from "@/components/todo/views/boardview/TaskCard";
 
-import { columns, type Task } from "../view-config";
+import { columns, type ColumnStatus } from "../view-config";
 
 import type { Todo } from "@/types/services/todo";
 
 import { useGetTodosQuery } from "@/hooks/queries/useTodo.queries";
-import { useMoveTodoMutation } from "@/hooks/mutations/useTodo.mutation";
 
 export default function BoardView() {
-  // Single source of truth
   const { data: tasks = [] } = useGetTodosQuery();
-
-  const moveTodoMutation = useMoveTodoMutation();
+  const [localTasks, setLocalTasks] = useState<Todo[] | null>(null);
+  const boardTasks = localTasks ?? tasks;
 
   const [activeTask, setActiveTask] = useState<Todo | null>(null);
+
+  const isColumnId = (value: string): value is ColumnStatus => {
+    return columns.includes(value as ColumnStatus);
+  };
+
+  const groupByColumn = (items: Todo[]) => {
+    return columns.reduce(
+      (acc, col) => {
+        acc[col] = items
+          .filter((task) => task.status === col)
+          .sort((a, b) => a.position - b.position);
+
+        return acc;
+      },
+      {} as Record<ColumnStatus, Todo[]>,
+    );
+  };
+
+  const flattenColumns = (grouped: Record<ColumnStatus, Todo[]>) => {
+    return columns.flatMap((col) =>
+      grouped[col].map((task, index) => ({
+        ...task,
+        position: index,
+      })),
+    );
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -36,12 +61,12 @@ export default function BoardView() {
   );
 
   const handleDragStart = (event: DragStartEvent) => {
-    const task = tasks.find((t) => t._id === event.active.id);
+    const task = boardTasks.find((t) => t._id === event.active.id);
 
     setActiveTask(task ?? null);
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     setActiveTask(null);
@@ -49,43 +74,64 @@ export default function BoardView() {
     if (!over) return;
 
     const taskId = String(active.id);
-    const newStatus = over.id as Task["status"];
 
-    const movedTask = tasks.find((t) => t._id === taskId);
+    setLocalTasks((prev) => {
+      const sourceTasks = prev ?? tasks;
+      const activeItem = sourceTasks.find((task) => task._id === taskId);
+      if (!activeItem) return prev;
 
-    if (!movedTask) return;
+      const grouped = groupByColumn(sourceTasks);
+      const sourceColumn = activeItem.status as ColumnStatus;
+      const sourceItems = [...grouped[sourceColumn]];
+      const sourceIndex = sourceItems.findIndex((task) => task._id === taskId);
 
-    // prevent unnecessary mutation
-    if (movedTask.status === newStatus) return;
+      if (sourceIndex === -1) return prev;
 
-    // tasks in destination column
-    const targetTasks = tasks
-      .filter((t) => t.status === newStatus)
-      .sort((a, b) => a.position - b.position);
+      const overId = String(over.id);
+      const isOverColumn = isColumnId(overId);
+      const overItem = sourceTasks.find((task) => task._id === overId);
+      const destinationColumn = isOverColumn
+        ? overId
+        : (overItem?.status as ColumnStatus | undefined);
 
-    // append to end
-    const before = targetTasks[targetTasks.length - 1];
+      if (!destinationColumn) return sourceTasks;
 
-    const payload = {
-      todoId: taskId,
-      status: newStatus,
-      beforeId: before?._id,
-      afterId: undefined,
-    };
+      if (destinationColumn === sourceColumn) {
+        const targetIndex = isOverColumn
+          ? sourceItems.length - 1
+          : sourceItems.findIndex((task) => task._id === overId);
 
-    moveTodoMutation.mutate(payload);
+        if (targetIndex < 0 || targetIndex === sourceIndex) return sourceTasks;
+
+        grouped[sourceColumn] = arrayMove(sourceItems, sourceIndex, targetIndex);
+        return flattenColumns(grouped);
+      }
+
+      const [movedItem] = sourceItems.splice(sourceIndex, 1);
+      if (!movedItem) return sourceTasks;
+
+      const destinationItems = [...grouped[destinationColumn]];
+      const insertIndex = isOverColumn
+        ? destinationItems.length
+        : destinationItems.findIndex((task) => task._id === overId);
+
+      destinationItems.splice(
+        insertIndex >= 0 ? insertIndex : destinationItems.length,
+        0,
+        {
+          ...movedItem,
+          status: destinationColumn,
+        },
+      );
+
+      grouped[sourceColumn] = sourceItems;
+      grouped[destinationColumn] = destinationItems;
+
+      return flattenColumns(grouped);
+    });
   };
 
-  const groupedTasks = columns.reduce(
-    (acc, col) => {
-      acc[col] = tasks
-        .filter((t) => t.status === col)
-        .sort((a, b) => a.position - b.position);
-
-      return acc;
-    },
-    {} as Record<string, Todo[]>,
-  );
+  const groupedTasks = groupByColumn(boardTasks);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragCancel = (_event: DragCancelEvent) => {

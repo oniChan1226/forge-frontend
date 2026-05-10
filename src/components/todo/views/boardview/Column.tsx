@@ -1,6 +1,10 @@
 import { Plus } from "lucide-react";
 import TaskCard from "./TaskCard";
 import { useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import type { ColumnStatus } from "../view-config";
 import type { Todo } from "@/types/services/todo";
 
@@ -45,9 +49,14 @@ export default function Column({ status, tasks }: ColumnProps) {
       </div>
 
       <div ref={setNodeRef} className="min-h-50 space-y-2">
-        {tasks.map((task) => (
-          <TaskCard key={task._id} task={task} />
-        ))}
+        <SortableContext
+          items={tasks.map((task) => task._id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {tasks.map((task) => (
+            <TaskCard key={task._id} task={task} />
+          ))}
+        </SortableContext>
 
         {tasks.length === 0 && (
           <div className="text-xs text-neutral-500 border border-dashed border-neutral-700 rounded-lg p-3 text-center">

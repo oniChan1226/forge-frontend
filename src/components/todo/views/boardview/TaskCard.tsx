@@ -1,4 +1,4 @@
-import { useDraggable } from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import * as motion from "motion/react-client";
 import type { Todo } from "@/types/services/todo";
@@ -9,14 +9,15 @@ interface TaskCardProps {
 }
 
 export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({
       id: task._id,
       disabled: isOverlay,
     });
 
   const style = {
     transform: CSS.Transform.toString(transform),
+    transition,
   };
 
   return (
