@@ -71,7 +71,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         {/* Content */}
-        <main className="flex-1 pt-4 px-3 md:px-5 overflow-y-auto">
+        <main className="flex-1 pt-4 px-3 md:px-5 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-muted-foreground scrollbar-track-secondary">
           {children}
         </main>
       </div>

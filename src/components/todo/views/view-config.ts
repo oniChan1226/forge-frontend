@@ -10,8 +10,8 @@ export type Task = {
 
 
 export const priorityBadgeStyles = {
-  low: "bg-green-100 text-green-800",
-  medium: "bg-orange-100 text-orange-800",
-  high: "bg-red-100 text-red-800",
-  urgent: "bg-purple-100 text-purple-800",
-}
+  low: "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300",
+  medium: "bg-orange-100 text-orange-800 dark:bg-orange-500/15 dark:text-orange-300",
+  high: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300",
+  urgent: "bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300",
+};

@@ -7,7 +7,7 @@ export type Todo = {
   title: string;
   description?: string;
   priority: "low" | "medium" | "high" | "urgent";
-  tags?: string[];
+  tags: string[];
   dueDate?: Date | null;
   position: number;
   createdAt: string;

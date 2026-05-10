@@ -40,7 +40,7 @@ export function TagEditor({
         value={value}
         placeholder="Share your thoughts"
         allowSuggestionsAboveCursor
-        className="mentions-container"
+        className="mentions-container text-wrap"
         maxLength={maxLength}
         onChange={(_e, newValue, plainTextValue, mentions) => {
           const words = plainTextValue.trim().split(/\s+/).filter(Boolean);
@@ -66,10 +66,18 @@ export function TagEditor({
             border: "none",
             minHeight: 140,
             color: "inherit",
+
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+            overflowWrap: "anywhere",
           },
           highlighter: {
             border: "none",
             minHeight: 140,
+
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+            overflowWrap: "anywhere",
           },
           suggestions: {
             list: {

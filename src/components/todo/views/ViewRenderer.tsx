@@ -25,7 +25,11 @@ const views = {
 const ViewRenderer = ({ view }: ViewRendererProps) => {
   const ActiveView = views[view];
 
-  return <ActiveView />;
+  return (
+    <div className="w-full pt-8">
+      <ActiveView />
+    </div>
+  );
 
   //   return (
   //     <Suspense fallback={<div>Loading view...</div>}>

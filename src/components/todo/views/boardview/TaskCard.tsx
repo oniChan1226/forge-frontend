@@ -4,7 +4,7 @@ import * as motion from "motion/react-client";
 import type { Todo } from "@/types/services/todo";
 import { Badge } from "@/components/ui/badge";
 import { priorityBadgeStyles } from "../view-config";
-import { MoreHorizontal, Edit, Trash } from "lucide-react";
+import { MoreHorizontal, Edit, Trash, Clock } from "lucide-react";
 import { TooltipWrapper } from "@/components/generic/TooltipWrapper";
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formatDueDate } from "@/utils/helpers";
 
 interface TaskCardProps {
   task: Todo;
@@ -67,7 +68,7 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
           variant="secondary"
           className={`capitalize text-xs mb-2 rounded-xs ${priorityBadgeStyles[task.priority]}`}
         >
-          !{task.priority}
+          ! {task.priority}
         </Badge>
 
         <DropdownMenu>
@@ -79,8 +80,11 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="start" className="rounded-sm">
-            <DropdownMenuItem onClick={() => console.log("edit")} className="text-sm">
-              <Edit className="mr-1" size={5}/>
+            <DropdownMenuItem
+              onClick={() => console.log("edit")}
+              className="text-sm"
+            >
+              <Edit className="mr-1" size={5} />
               Edit
             </DropdownMenuItem>
 
@@ -111,7 +115,7 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
             {task.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center rounded-sm bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary/80 transition-colors hover:bg-primary/15"
+                className="inline-flex items-center max-w-[120px] truncate overflow-hidden whitespace-nowrap rounded-sm bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary/80 transition-colors hover:bg-primary/15"
               >
                 @{tag}
               </span>
@@ -130,6 +134,17 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
               </TooltipWrapper>
             )}
           </div>
+        )}
+      </div>
+
+      <div className="mt-2">
+        {task.dueDate && (
+          <TooltipWrapper tip={formatDueDate(task.dueDate).human}>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground cursor-default">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{formatDueDate(task.dueDate).relative}</span>
+            </div>
+          </TooltipWrapper>
         )}
       </div>
     </motion.div>

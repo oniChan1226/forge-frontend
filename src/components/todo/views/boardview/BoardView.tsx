@@ -197,7 +197,7 @@ export default function BoardView() {
   };
 
   return (
-    <div className="w-full pt-6 md:pt-12">
+    <div className="">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}

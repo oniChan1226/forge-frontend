@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+
+@plugin 'tailwind-scrollbar';
 /* prefer loading via Google Fonts in index.html for best CDN caching */
 
 @custom-variant dark (&:is(.dark *));
