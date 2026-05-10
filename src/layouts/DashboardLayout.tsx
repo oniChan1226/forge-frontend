@@ -10,7 +10,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="h-screen flex overflow-hidden">
+    <main className="h-screen flex overflow-hidden">
       {/* Overlay (mobile) */}
       {mobileOpen && (
         <div
@@ -71,9 +71,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         {/* Content */}
-        <main className="flex-1 pt-4 px-3 md:px-5 overflow-y-auto">{children}</main>
+        <main className="flex-1 pt-4 px-3 md:px-5 overflow-y-auto">
+          {children}
+        </main>
       </div>
-    </div>
+    </main>
   );
 };
 
