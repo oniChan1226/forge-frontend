@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   DndContext,
   closestCorners,
@@ -24,7 +24,7 @@ import { useGetTodosQuery } from "@/hooks/queries/useTodo.queries";
 export default function BoardView() {
   const { data: tasks = [] } = useGetTodosQuery();
   const [localTasks, setLocalTasks] = useState<Todo[] | null>(null);
-  const boardTasks = localTasks ?? tasks;
+  const boardTasks = useMemo(() => localTasks ?? tasks, [localTasks, tasks]);
 
   const [activeTask, setActiveTask] = useState<Todo | null>(null);
 
@@ -103,7 +103,25 @@ export default function BoardView() {
 
         if (targetIndex < 0 || targetIndex === sourceIndex) return sourceTasks;
 
-        grouped[sourceColumn] = arrayMove(sourceItems, sourceIndex, targetIndex);
+        const afterMove = arrayMove(sourceItems, sourceIndex, targetIndex);
+
+        // payload for same-column reorder
+        const beforeId = afterMove[targetIndex - 1]?._id;
+        const afterId = afterMove[targetIndex + 1]?._id;
+
+        const payload = {
+          todoId: taskId,
+          fromColumn: sourceColumn,
+          toColumn: destinationColumn,
+          fromIndex: sourceIndex,
+          toIndex: targetIndex,
+          beforeId: beforeId ?? undefined,
+          afterId: afterId ?? undefined,
+        };
+
+        console.log("🚀 Move payload:", payload);
+
+        grouped[sourceColumn] = afterMove;
         return flattenColumns(grouped);
       }
 
@@ -115,14 +133,28 @@ export default function BoardView() {
         ? destinationItems.length
         : destinationItems.findIndex((task) => task._id === overId);
 
-      destinationItems.splice(
-        insertIndex >= 0 ? insertIndex : destinationItems.length,
-        0,
-        {
-          ...movedItem,
-          status: destinationColumn,
-        },
-      );
+      const finalIndex = insertIndex >= 0 ? insertIndex : destinationItems.length;
+
+      // payload for cross-column move
+      const beforeId = destinationItems[finalIndex - 1]?._id;
+      const afterId = destinationItems[finalIndex]?._id;
+
+      const payload = {
+        todoId: taskId,
+        fromColumn: sourceColumn,
+        toColumn: destinationColumn,
+        fromIndex: sourceIndex,
+        toIndex: finalIndex,
+        beforeId: beforeId ?? undefined,
+        afterId: afterId ?? undefined,
+      };
+
+      console.log("🚀 Move payload:", payload);
+
+      destinationItems.splice(finalIndex, 0, {
+        ...movedItem,
+        status: destinationColumn,
+      });
 
       grouped[sourceColumn] = sourceItems;
       grouped[destinationColumn] = destinationItems;
