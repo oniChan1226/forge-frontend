@@ -25,7 +25,34 @@ import { useMoveTodoMutation } from "@/hooks/mutations/useTodo.mutation";
 export default function BoardView() {
   const { data: tasks = [] } = useGetTodosQuery();
   const [localTasks, setLocalTasks] = useState<Todo[] | null>(null);
-  const boardTasks = useMemo(() => localTasks ?? tasks, [localTasks, tasks]);
+  const boardTasks = useMemo<Todo[]>(() => {
+    const src = (localTasks ?? tasks) as unknown;
+    if (Array.isArray(src)) return src as Todo[];
+
+    if (src && typeof src === "object") {
+      const s = src as Record<string, unknown>;
+
+      const data = s["data"];
+      if (Array.isArray(data)) return data as Todo[];
+
+      const todos = s["todos"];
+      if (Array.isArray(todos)) return todos as Todo[];
+
+      // fallback: collect arrays or single todo-like objects from values
+      const vals = Object.values(s).reduce<Todo[]>((acc, v) => {
+        if (Array.isArray(v)) {
+          acc.push(...(v as Todo[]));
+        } else if (v && typeof v === "object" && "_id" in (v as Record<string, unknown>)) {
+          acc.push(v as Todo);
+        }
+        return acc;
+      }, []);
+
+      return vals;
+    }
+
+    return [];
+  }, [localTasks, tasks]);
 
   const moveTodoMutation = useMoveTodoMutation();
 
