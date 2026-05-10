@@ -1,4 +1,4 @@
-import type { CreateTodoDTO } from "@/types/services/todo";
+import type { CreateTodoDTO, MoveTodoDTO } from "@/types/services/todo";
 import { apiClient } from ".";
 
 const BaseRoute = "/users/todos";
@@ -21,6 +21,11 @@ export const TodoService = {
 
   updateTodo: async (id: string, data: Partial<CreateTodoDTO>) => {
     const res = await apiClient.put(`${BaseRoute}/${id}`, data);
+    return res.data;
+  },
+
+  moveTodo: async (payload: MoveTodoDTO) => {
+    const res = await apiClient.post(`${BaseRoute}/${payload.todoId}/move`, payload);
     return res.data;
   },
 };

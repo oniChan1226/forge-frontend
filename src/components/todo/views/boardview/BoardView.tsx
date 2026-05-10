@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   DndContext,
   closestCorners,
@@ -20,11 +20,14 @@ import { columns, type ColumnStatus } from "../view-config";
 import type { Todo } from "@/types/services/todo";
 
 import { useGetTodosQuery } from "@/hooks/queries/useTodo.queries";
+import { useMoveTodoMutation } from "@/hooks/mutations/useTodo.mutation";
 
 export default function BoardView() {
   const { data: tasks = [] } = useGetTodosQuery();
   const [localTasks, setLocalTasks] = useState<Todo[] | null>(null);
   const boardTasks = useMemo(() => localTasks ?? tasks, [localTasks, tasks]);
+
+  const moveTodoMutation = useMoveTodoMutation();
 
   const [activeTask, setActiveTask] = useState<Todo | null>(null);
 
@@ -119,7 +122,12 @@ export default function BoardView() {
           afterId: afterId ?? undefined,
         };
 
-        console.log("🚀 Move payload:", payload);
+        moveTodoMutation.mutate({
+          status: payload.toColumn,
+          todoId: payload.todoId,
+          beforeId: payload.beforeId,
+          afterId: payload.afterId,
+        });
 
         grouped[sourceColumn] = afterMove;
         return flattenColumns(grouped);
@@ -133,7 +141,8 @@ export default function BoardView() {
         ? destinationItems.length
         : destinationItems.findIndex((task) => task._id === overId);
 
-      const finalIndex = insertIndex >= 0 ? insertIndex : destinationItems.length;
+      const finalIndex =
+        insertIndex >= 0 ? insertIndex : destinationItems.length;
 
       // payload for cross-column move
       const beforeId = destinationItems[finalIndex - 1]?._id;
@@ -164,6 +173,14 @@ export default function BoardView() {
   };
 
   const groupedTasks = groupByColumn(boardTasks);
+
+  // If the server tasks change (for example after a create), discard local override
+  useEffect(() => {
+    if (localTasks) {
+      Promise.resolve().then(() => setLocalTasks(null));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragCancel = (_event: DragCancelEvent) => {
