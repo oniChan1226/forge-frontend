@@ -1,7 +1,8 @@
 import { Plus } from "lucide-react";
 import TaskCard from "./TaskCard";
 import { useDroppable } from "@dnd-kit/core";
-import type { ColumnStatus, Task } from "../view-config";
+import type { ColumnStatus } from "../view-config";
+import type { Todo } from "@/types/services/todo";
 
 const statusStyles: Record<ColumnStatus, string> = {
   backlog: "bg-status-backlog/20 text-black dark:text-white",
@@ -12,7 +13,7 @@ const statusStyles: Record<ColumnStatus, string> = {
 
 interface ColumnProps {
   status: ColumnStatus;
-  tasks: Task[];
+  tasks: Todo[];
 }
 
 export default function Column({ status, tasks }: ColumnProps) {
@@ -45,7 +46,7 @@ export default function Column({ status, tasks }: ColumnProps) {
 
       <div ref={setNodeRef} className="min-h-50 space-y-2">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task._id} task={task} />
         ))}
 
         {tasks.length === 0 && (

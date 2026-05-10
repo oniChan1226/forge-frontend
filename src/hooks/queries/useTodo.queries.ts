@@ -1,9 +1,10 @@
 import { TodoService } from "@/services/todo.service"
+import type { Todo } from "@/types/services/todo"
 import { useQuery } from "@tanstack/react-query"
 
 
 export const useGetTodosQuery = () => {
-    return useQuery({
+    return useQuery<Todo[]>({
         queryKey: ["todos"],
         queryFn: TodoService.getTodos,
         retry: false,

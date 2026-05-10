@@ -3,6 +3,7 @@ import type z from "zod";
 
 export type Todo = z.infer<typeof createTodoSchema> & {
   _id: string;
+  position: number;
   createdAt: string;
   updatedAt: string;
 };

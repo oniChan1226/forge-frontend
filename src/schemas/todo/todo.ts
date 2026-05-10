@@ -6,7 +6,7 @@ export const createTodoSchema = z.object({
 	status: z.enum(["backlog", "in-progress", "in-review", "done"]).optional(),
 	priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
 	tags: z.array(z.string()).optional(),
-	dueDate: z.string().optional(),
+	dueDate: z.date().optional(),
 	position: z.number().int().optional(),
 	completed: z.boolean().optional(),
 });
