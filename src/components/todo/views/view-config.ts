@@ -15,3 +15,10 @@ export const priorityBadgeStyles = {
   high: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300",
   urgent: "bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300",
 };
+
+export const priorityOptionsMap = {
+  low: "Meh",
+  medium: "Maybe Important",
+  high: "Important",
+  urgent: "Urgent",
+}

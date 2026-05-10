@@ -5,6 +5,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { useTodoModal } from "@/contexts/todo-modal-context";
 import type { ColumnStatus } from "../view-config";
 import type { Todo } from "@/types/services/todo";
 
@@ -21,12 +22,13 @@ interface ColumnProps {
 }
 
 export default function Column({ status, tasks }: ColumnProps) {
+  const { openCreateModal } = useTodoModal();
   const { setNodeRef } = useDroppable({
     id: status,
   });
 
-  const handleAddTask = async () => {
-    alert(`Add new task to ${status}`);
+  const handleAddTask = () => {
+    openCreateModal(status);
   };
 
   return (

@@ -1,5 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
 import { format } from "date-fns";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -32,38 +33,45 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { TagEditor } from "./TagInput";
 import { stripTagsFromDescription } from "@/utils/tag-helpers";
+import { useTodoModal } from "@/contexts/todo-modal-context";
 import { Sparkles } from "lucide-react";
 import { useCreateTodoMutation } from "@/hooks/mutations/useTodo.mutation";
 import type { CreateTodoDTO } from "@/types/services/todo";
 import Loader from "@/utils/Loader";
 
-interface CreateTodoModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+export function CreateTodoModal() {
+  const { isOpen, closeModal, prefilledStatus } = useTodoModal();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const PRIORITIES = ["low", "medium", "high", "urgent"] as const;
-
-export function CreateTodoModal({ isOpen, onClose }: CreateTodoModalProps) {
   const {
     register,
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<CreateTodoDTO>({
     defaultValues: {
       title: "",
       description: "",
       priority: "low",
-      status: "backlog",
+      status: prefilledStatus ?? "backlog",
       dueDate: undefined,
       tags: [],
     },
   });
 
   const createTodoMutation = useCreateTodoMutation();
+
+  useEffect(() => {
+    if (prefilledStatus) {
+      setValue("status", prefilledStatus);
+    }
+  }, [prefilledStatus, setValue]);
+
+  const handleClose = () => {
+    reset();
+    closeModal();
+  };
 
   const onSubmit = async (values: CreateTodoDTO) => {
     try {
@@ -79,8 +87,7 @@ export function CreateTodoModal({ isOpen, onClose }: CreateTodoModalProps) {
 
       await createTodoMutation.mutateAsync(payload);
 
-      reset();
-      onClose();
+      handleClose();
     } catch (err) {
       // optional: show toast/error handling
       console.error(err);
@@ -92,8 +99,7 @@ export function CreateTodoModal({ isOpen, onClose }: CreateTodoModalProps) {
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
-          reset();
-          onClose();
+          handleClose();
         }
       }}
     >
@@ -180,7 +186,7 @@ export function CreateTodoModal({ isOpen, onClose }: CreateTodoModalProps) {
                     >
                       <SelectItem value="low">Meh</SelectItem>
                       <SelectItem value="medium">Maybe Important</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="high">Important</SelectItem>
                       <SelectItem value="urgent">Urgent</SelectItem>
                     </SelectContent>
                   </Select>
@@ -299,10 +305,7 @@ export function CreateTodoModal({ isOpen, onClose }: CreateTodoModalProps) {
               type="button"
               variant="outline"
               disabled={createTodoMutation.isPending}
-              onClick={() => {
-                reset();
-                onClose();
-              }}
+              onClick={handleClose}
             >
               Cancel
             </Button>

@@ -4,22 +4,19 @@ import ViewRenderer from "@/components/todo/views/ViewRenderer";
 import { useSearchParams } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { CreateTodoModal } from "@/components/todo/main/CreateTodoSheet";
 import { TooltipWrapper } from "@/components/generic/TooltipWrapper";
+import { TodoModalProvider, useTodoModal } from "@/contexts/todo-modal-context";
 
-const TodoPage = () => {
+const TodoPageContent = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { openCreateModal } = useTodoModal();
 
   const currentView = (searchParams.get("view") as ViewId) || "board";
 
-  const [isOpen, setOpen] = useState(false);
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-      }
       const isMac = navigator.platform.toLowerCase().includes("mac");
 
       const isShortcut = isMac
@@ -41,7 +38,7 @@ const TodoPage = () => {
       }
 
       e.preventDefault();
-      setOpen(true);
+      openCreateModal();
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -49,7 +46,7 @@ const TodoPage = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [openCreateModal]);
 
   const onViewChange = (view: ViewId) => {
     setSearchParams((prev) => {
@@ -78,7 +75,7 @@ const TodoPage = () => {
         <motion.button
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
-          onClick={() => setOpen(true)}
+          onClick={() => openCreateModal()}
           className="fixed bottom-6 right-6 z-50 flex items-center gap-2 h-12 px-3 rounded-full  bg-primary text-primary-foreground transition-all active:scale-95 cursor-pointer group hover:bg-primary-dark"
         >
           <Plus
@@ -87,8 +84,16 @@ const TodoPage = () => {
           />
         </motion.button>
       </TooltipWrapper>
-      <CreateTodoModal isOpen={isOpen} onClose={() => setOpen(false)} />
+      <CreateTodoModal />
     </div>
+  );
+};
+
+const TodoPage = () => {
+  return (
+    <TodoModalProvider>
+      <TodoPageContent />
+    </TodoModalProvider>
   );
 };
 

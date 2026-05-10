@@ -3,7 +3,7 @@ import { CSS } from "@dnd-kit/utilities";
 import * as motion from "motion/react-client";
 import type { Todo } from "@/types/services/todo";
 import { Badge } from "@/components/ui/badge";
-import { priorityBadgeStyles } from "../view-config";
+import { priorityBadgeStyles, priorityOptionsMap } from "../view-config";
 import { MoreHorizontal, Edit, Trash, Clock } from "lucide-react";
 import { TooltipWrapper } from "@/components/generic/TooltipWrapper";
 import {
@@ -68,7 +68,7 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
           variant="secondary"
           className={`capitalize text-xs mb-2 rounded-xs ${priorityBadgeStyles[task.priority]}`}
         >
-          ! {task.priority}
+          ! {priorityOptionsMap[task.priority]}
         </Badge>
 
         <DropdownMenu>
@@ -115,7 +115,7 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
             {task.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center max-w-[120px] truncate overflow-hidden whitespace-nowrap rounded-sm bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary/80 transition-colors hover:bg-primary/15"
+                className="inline-flex items-center max-w-30 truncate overflow-hidden whitespace-nowrap rounded-sm bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary/80 transition-colors hover:bg-primary/15"
               >
                 @{tag}
               </span>
