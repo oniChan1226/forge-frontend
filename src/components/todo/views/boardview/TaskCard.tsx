@@ -46,7 +46,14 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
         }
       `}
     >
-      <p className="text-sm font-medium">{task.title}</p>
+      <div>
+        <h6 className="text-sm font-medium">{task.title}</h6>
+        {task.description && (
+          <p className="text-xs text-neutral-500 mt-1 line-clamp-2">
+            {task.description}
+          </p>
+        )}
+      </div>
 
       <div className="mt-3 flex items-center justify-between text-xs text-neutral-500">
         <span>Low priority</span>
