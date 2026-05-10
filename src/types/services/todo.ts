@@ -12,7 +12,9 @@ export type CreateTodoDTO = z.infer<typeof createTodoSchema>;
 
 export type MoveTodoDTO = {
   todoId: string;
-  status: string;
-  beforeId?: string;
-  afterId?: string;
+  input: {
+    status: string;
+    beforeId?: string;
+    afterId?: string;
+  }
 }

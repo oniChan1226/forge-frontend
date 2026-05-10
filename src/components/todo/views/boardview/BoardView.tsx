@@ -123,10 +123,12 @@ export default function BoardView() {
         };
 
         moveTodoMutation.mutate({
-          status: payload.toColumn,
           todoId: payload.todoId,
-          beforeId: payload.beforeId,
-          afterId: payload.afterId,
+          input: {
+            status: payload.toColumn,
+            beforeId: payload.beforeId,
+            afterId: payload.afterId,
+          },
         });
 
         grouped[sourceColumn] = afterMove;
@@ -158,7 +160,14 @@ export default function BoardView() {
         afterId: afterId ?? undefined,
       };
 
-      console.log("🚀 Move payload:", payload);
+      moveTodoMutation.mutate({
+        todoId: payload.todoId,
+        input: {
+          status: payload.toColumn,
+          beforeId: payload.beforeId,
+          afterId: payload.afterId,
+        },
+      });
 
       destinationItems.splice(finalIndex, 0, {
         ...movedItem,
