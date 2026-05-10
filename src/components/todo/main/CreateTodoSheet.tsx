@@ -31,6 +31,7 @@ import {
 
 import { Calendar } from "@/components/ui/calendar";
 import { TagEditor } from "./TagInput";
+import { stripTagsFromDescription } from "@/utils/tag-helpers";
 import { Sparkles } from "lucide-react";
 import { useCreateTodoMutation } from "@/hooks/mutations/useTodo.mutation";
 import type { CreateTodoDTO } from "@/types/services/todo";
@@ -66,7 +67,17 @@ export function CreateTodoModal({ isOpen, onClose }: CreateTodoModalProps) {
 
   const onSubmit = async (values: CreateTodoDTO) => {
     try {
-      await createTodoMutation.mutateAsync(values);
+      // Strip tag mentions from description for final payload
+      const cleanDescription = values.description
+        ? stripTagsFromDescription(values.description)
+        : "";
+
+      const payload: CreateTodoDTO = {
+        ...values,
+        description: cleanDescription,
+      };
+
+      await createTodoMutation.mutateAsync(payload);
 
       reset();
       onClose();

@@ -33,7 +33,7 @@ export default function Column({ status, tasks }: ColumnProps) {
     <div className="min-w-44 w-full">
       <div className="flex items-center justify-between mb-3">
         <div className="flex space-x-2 items-center">
-          <h2 className="text-base font-semibold capitalize">{status}</h2>
+          <h2 className="text-sm font-semibold capitalize">{status}</h2>
           <span
             className={`text-xs px-2 py-0.5 rounded-full font-bold ${statusStyles[status]}`}
           >

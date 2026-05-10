@@ -42,7 +42,7 @@ export function TagEditor({
         allowSuggestionsAboveCursor
         className="mentions-container"
         maxLength={maxLength}
-        onChange={(e, newValue, plainTextValue, mentions) => {
+        onChange={(_e, newValue, plainTextValue, mentions) => {
           const words = plainTextValue.trim().split(/\s+/).filter(Boolean);
 
           // ❌ BLOCK ANY INPUT THAT EXCEEDS LIMIT
