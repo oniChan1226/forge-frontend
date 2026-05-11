@@ -25,7 +25,7 @@ export function TagEditor({
   availableTags = [],
 }: Props) {
   const wordsUsed = countWords(value);
-  const TAGS = availableTags ?? [
+  const FALLBACK_TAGS = [
     "urgent",
     "important",
     "later",
@@ -37,8 +37,7 @@ export function TagEditor({
     "backend",
     "frontend",
   ];
-
-  console.log(TAGS)
+  const TAGS = availableTags.length > 0 ? availableTags : FALLBACK_TAGS;
 
   return (
     <div className="group relative rounded-md border border-border bg-card p-2 transition-all focus-within:ring-2 focus-within:ring-primary/50">

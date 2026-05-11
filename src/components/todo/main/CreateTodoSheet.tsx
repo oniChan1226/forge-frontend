@@ -1,6 +1,6 @@
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +58,17 @@ import { useGetUserTagsQuery } from "@/hooks/queries/useUserTag.queries";
 export function CreateTodoModal() {
   const { isOpen, closeModal, prefilledStatus, todoToEdit } = useTodoModal();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { data: tagsData } = useGetUserTagsQuery();
+  const userTags = useMemo(
+    () => tagsData?.data?.map((t) => t.name) ?? [],
+    [tagsData],
+  );
+
+  const availableTags = useMemo(() => {
+    if (!todoToEdit) return userTags;
+
+    return Array.from(new Set([...userTags, ...(todoToEdit.tags ?? [])]));
+  }, [userTags, todoToEdit]);
 
   const getFormDefaults = () => ({
     title: todoToEdit?.title ?? "",
@@ -97,12 +108,6 @@ export function CreateTodoModal() {
   const createTodoMutation = useCreateTodoMutation();
   const updateTodoMutation = useUpdateTodoMutation();
   const deleteTodoMutation = useDeleteTodoMutation();
-  const { data: userTags = [], } =
-    useGetUserTagsQuery();
-
-  const availableTags = todoToEdit
-    ? Array.from(new Set([...userTags?., ...(todoToEdit.tags ?? [])]))
-    : userTags;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -240,7 +245,7 @@ export function CreateTodoModal() {
             />
           </div>
 
-          {todoToEdit && todoToEdit.tags.length > 0 && (
+          {todoToEdit && availableTags.length > 0 && (
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -289,7 +294,7 @@ export function CreateTodoModal() {
                   <CommandEmpty>No tag found.</CommandEmpty>
 
                   <CommandGroup>
-                    {todoToEdit.tags.map((tag) => {
+                    {availableTags.map((tag) => {
                       const isSelected = selectedTags.includes(tag);
 
                       return (
