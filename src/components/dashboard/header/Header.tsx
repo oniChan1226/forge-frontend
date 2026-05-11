@@ -1,7 +1,8 @@
 import { Input } from "@/components/ui/input";
-import { Bell, Menu, Search } from "lucide-react";
+import { Bell, Sun, Moon, Menu, Search } from "lucide-react";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import UserProfileButton from "./UserProfileButton";
+import { useTheme } from "@/hooks/custom/use-theme";
 
 interface HeaderProps {
   setMobileOpen: Dispatch<SetStateAction<boolean>>;
@@ -9,6 +10,7 @@ interface HeaderProps {
 
 const Header = ({ setMobileOpen }: HeaderProps) => {
   const [search, setSearch] = useState("");
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="h-16 border-b flex items-center justify-between px-4 md:px-6">
@@ -35,6 +37,13 @@ const Header = ({ setMobileOpen }: HeaderProps) => {
           ></Input>
         </div>
         <div className="right flex items-center justify-center gap-x-2">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-sm"
+          >
+            {theme === "light" ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
           {/* Notification Bell */}
           <div className="relative ">
             <Bell size={20} />
