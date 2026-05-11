@@ -8,6 +8,7 @@ import { DashboardRoute } from "./DashboardRoute";
 import { ROUTE_PATHS } from "./route-paths";
 import TodoPage from "@/pages/protected/TodoPage";
 import NotesPage from "@/pages/protected/NotesPage";
+import NotesLayout from "@/layouts/NotesLayout";
 
 export const appRoutes = [
   {
@@ -46,7 +47,9 @@ export const appRoutes = [
     path: ROUTE_PATHS.notes,
     element: (
       <DashboardRoute>
-        <NotesPage />
+        <NotesLayout>
+          <NotesPage />
+        </NotesLayout>
       </DashboardRoute>
     ),
   },
