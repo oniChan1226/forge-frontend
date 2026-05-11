@@ -1,11 +1,13 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import * as motion from "motion/react-client";
+import { useState } from "react";
 import type { Todo } from "@/types/services/todo";
 import { Badge } from "@/components/ui/badge";
 import { priorityBadgeStyles, priorityOptionsMap } from "../view-config";
 import { MoreHorizontal, Edit, Trash, Clock } from "lucide-react";
 import { TooltipWrapper } from "@/components/generic/TooltipWrapper";
+import { ConfirmActionModal } from "@/components/generic/ConfirmActionModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +26,7 @@ interface TaskCardProps {
 export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
   const { openEditModal } = useTodoModal();
   const deleteTodoMutation = useDeleteTodoMutation();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const {
     attributes,
@@ -99,14 +102,8 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
 
             <DropdownMenuItem
               variant="destructive"
-              onClick={async () => {
-                const confirmed = window.confirm(
-                  "Delete this todo? This cannot be undone.",
-                );
-
-                if (!confirmed) return;
-
-                await deleteTodoMutation.mutateAsync(task._id);
+              onClick={() => {
+                setShowDeleteConfirm(true);
               }}
               className="text-sm"
             >
@@ -165,6 +162,19 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
           </TooltipWrapper>
         )}
       </div>
+
+      <ConfirmActionModal
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete this todo?"
+        description="This action cannot be undone and will permanently remove this task."
+        confirmLabel="Delete Todo"
+        onConfirm={async () => {
+          await deleteTodoMutation.mutateAsync(task._id);
+          setShowDeleteConfirm(false);
+        }}
+        isConfirming={deleteTodoMutation.isPending}
+      />
     </motion.div>
   );
 }

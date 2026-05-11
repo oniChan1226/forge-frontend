@@ -1,6 +1,6 @@
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { format } from "date-fns";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +45,7 @@ import { stripTagsFromDescription } from "@/utils/tag-helpers";
 import { useTodoModal } from "@/contexts/todo-modal-context";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Sparkles, X } from "lucide-react";
+import { ConfirmActionModal } from "@/components/generic/ConfirmActionModal";
 import {
   useCreateTodoMutation,
   useDeleteTodoMutation,
@@ -55,6 +56,7 @@ import Loader from "@/utils/Loader";
 
 export function CreateTodoModal() {
   const { isOpen, closeModal, prefilledStatus, todoToEdit } = useTodoModal();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const getFormDefaults = () => ({
     title: todoToEdit?.title ?? "",
@@ -157,8 +159,8 @@ export function CreateTodoModal() {
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-linear-to-b from-primary/10 to-transparent" />
+      <DialogContent className="sm:max-w-lg rounded-md" showCloseButton={!createTodoMutation.isPending && !updateTodoMutation.isPending}>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-linear-to-b from-primary/10 to-transparent rounded-t-md" />
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
           <DialogHeader className="gap-1">
@@ -463,15 +465,8 @@ export function CreateTodoModal() {
                 type="button"
                 variant="destructive"
                 disabled={deleteTodoMutation.isPending}
-                onClick={async () => {
-                  const confirmed = window.confirm(
-                    "Delete this todo? This cannot be undone.",
-                  );
-
-                  if (!confirmed) return;
-
-                  await deleteTodoMutation.mutateAsync(todoToEdit._id);
-                  handleClose();
+                onClick={() => {
+                  setShowDeleteConfirm(true);
                 }}
               >
                 <Loader
@@ -483,6 +478,22 @@ export function CreateTodoModal() {
             )}
           </DialogFooter>
         </form>
+
+        {todoToEdit && (
+          <ConfirmActionModal
+            open={showDeleteConfirm}
+            onOpenChange={setShowDeleteConfirm}
+            title="Delete this todo?"
+            description="This action cannot be undone and will permanently remove this task."
+            confirmLabel="Delete Todo"
+            onConfirm={async () => {
+              await deleteTodoMutation.mutateAsync(todoToEdit._id);
+              setShowDeleteConfirm(false);
+              handleClose();
+            }}
+            isConfirming={deleteTodoMutation.isPending}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
