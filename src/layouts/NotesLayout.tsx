@@ -72,11 +72,6 @@ const NotesSidebar = ({
         <div className="mt-4 space-y-2">
           {notes.map((note, index) => {
             const isActive = note.id === selectedNoteId;
-            const preview = note.content
-              .replace(/<[^>]*>/g, " ")
-              .replace(/\s+/g, " ")
-              .trim()
-              .slice(0, 90);
 
             return (
               <button

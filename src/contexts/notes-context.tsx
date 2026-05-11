@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 export type NoteDocument = {
   id: string;
@@ -52,143 +53,121 @@ const createInitialNotes = (): NoteDocument[] => {
   ];
 };
 
-const loadInitialState = () => {
-  if (typeof window === "undefined") {
-    const notes = createInitialNotes();
-    return {
-      notes,
-      selectedNoteId: notes[0]?.id ?? null,
-    };
-  }
-
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-
-    if (raw) {
-      const parsed = JSON.parse(raw) as {
-        notes?: NoteDocument[];
-        selectedNoteId?: string | null;
-      };
-
-      if (Array.isArray(parsed.notes) && parsed.notes.length > 0) {
-        return {
-          notes: parsed.notes,
-          selectedNoteId:
-            parsed.notes.find((note) => note.id === parsed.selectedNoteId)?.id ??
-            parsed.notes[0].id,
-        };
-      }
-    }
-  } catch {
-    // fall back to defaults
-  }
-
-  const notes = createInitialNotes();
-  return {
-    notes,
-    selectedNoteId: notes[0]?.id ?? null,
-  };
-};
-
-const NotesWorkspaceContext = createContext<NotesWorkspaceContextValue | null>(null);
-
 const createUntitledName = (notes: NoteDocument[]) => {
   const suffix = notes.length + 1;
   return suffix === 1 ? "Untitled note" : `Untitled note ${suffix}`;
 };
 
-export function NotesWorkspaceProvider({ children }: { children: React.ReactNode }) {
-  const initialState = useMemo(() => loadInitialState(), []);
-  const [notes, setNotes] = useState<NoteDocument[]>(initialState.notes);
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(
-    initialState.selectedNoteId,
-  );
+type NotesWorkspaceStore = {
+  notes: NoteDocument[];
+  selectedNoteId: string | null;
+  selectNote: (id: string) => void;
+  createNote: () => NoteDocument;
+  updateNote: (
+    id: string,
+    patch: Partial<Pick<NoteDocument, "title" | "content">>,
+  ) => void;
+  deleteNote: (id: string) => void;
+};
 
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ notes, selectedNoteId }),
-      );
-    } catch {
-      // ignore persistence errors in private browsing / disabled storage
-    }
-  }, [notes, selectedNoteId]);
+const initialNotes = createInitialNotes();
+
+const generateNoteId = () => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `note-${Date.now()}`;
+};
+
+const useNotesWorkspaceStore = create<NotesWorkspaceStore>()(
+  persist(
+    (set, get) => ({
+      notes: initialNotes,
+      selectedNoteId: initialNotes[0]?.id ?? null,
+
+      selectNote: (id) => set({ selectedNoteId: id }),
+
+      createNote: () => {
+        const now = new Date().toISOString();
+        const currentNotes = get().notes;
+        const newNote: NoteDocument = {
+          id: generateNoteId(),
+          title: createUntitledName(currentNotes),
+          content: "<p></p>",
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        set((state) => ({
+          notes: [newNote, ...state.notes],
+          selectedNoteId: newNote.id,
+        }));
+
+        return newNote;
+      },
+
+      updateNote: (id, patch) => {
+        const now = new Date().toISOString();
+
+        set((state) => ({
+          notes: state.notes.map((note) =>
+            note.id === id
+              ? {
+                  ...note,
+                  ...patch,
+                  updatedAt: now,
+                }
+              : note,
+          ),
+        }));
+      },
+
+      deleteNote: (id) => {
+        set((state) => {
+          const nextNotes = state.notes.filter((note) => note.id !== id);
+
+          return {
+            notes: nextNotes,
+            selectedNoteId:
+              state.selectedNoteId === id
+                ? (nextNotes[0]?.id ?? null)
+                : state.selectedNoteId,
+          };
+        });
+      },
+    }),
+    {
+      name: STORAGE_KEY,
+      storage: createJSONStorage(() => localStorage),
+      version: 1,
+    },
+  ),
+);
+
+export function NotesWorkspaceProvider({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function useNotesWorkspace(): NotesWorkspaceContextValue {
+  const notes = useNotesWorkspaceStore((state) => state.notes);
+  const selectedNoteId = useNotesWorkspaceStore((state) => state.selectedNoteId);
+  const selectNote = useNotesWorkspaceStore((state) => state.selectNote);
+  const createNote = useNotesWorkspaceStore((state) => state.createNote);
+  const updateNote = useNotesWorkspaceStore((state) => state.updateNote);
+  const deleteNote = useNotesWorkspaceStore((state) => state.deleteNote);
 
   const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null;
 
-  const createNote = () => {
-    const now = new Date().toISOString();
-    const newNote: NoteDocument = {
-      id: `note-${Date.now()}`,
-      title: createUntitledName(notes),
-      content: "<p></p>",
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    setNotes((prev) => [newNote, ...prev]);
-    setSelectedNoteId(newNote.id);
-
-    return newNote;
-  };
-
-  const updateNote = (
-    id: string,
-    patch: Partial<Pick<NoteDocument, "title" | "content">>,
-  ) => {
-    const now = new Date().toISOString();
-
-    setNotes((prev) =>
-      prev.map((note) =>
-        note.id === id
-          ? {
-              ...note,
-              ...patch,
-              updatedAt: now,
-            }
-          : note,
-      ),
-    );
-  };
-
-  const deleteNote = (id: string) => {
-    setNotes((prev) => {
-      const nextNotes = prev.filter((note) => note.id !== id);
-
-      if (selectedNoteId === id) {
-        setSelectedNoteId(nextNotes[0]?.id ?? null);
-      }
-
-      return nextNotes;
-    });
-  };
-
-  const value: NotesWorkspaceContextValue = {
+  return {
     notes,
     selectedNoteId,
     selectedNote,
-    selectNote: setSelectedNoteId,
+    selectNote,
     createNote,
     updateNote,
     deleteNote,
     noteCount: notes.length,
   };
-
-  return (
-    <NotesWorkspaceContext.Provider value={value}>
-      {children}
-    </NotesWorkspaceContext.Provider>
-  );
-}
-
-// eslint-disable-next-line react-refresh/only-export-components
-export function useNotesWorkspace() {
-  const context = useContext(NotesWorkspaceContext);
-
-  if (!context) {
-    throw new Error("useNotesWorkspace must be used within NotesWorkspaceProvider");
-  }
-
-  return context;
 }
