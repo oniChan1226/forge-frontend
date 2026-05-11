@@ -106,7 +106,7 @@ export default function BoardView() {
     const taskId = String(active.id);
 
     setLocalTasks((prev) => {
-      const sourceTasks = prev ?? tasks;
+      const sourceTasks = prev ?? boardTasks;
       const activeItem = sourceTasks.find((task) => task._id === taskId);
       if (!activeItem) return prev;
 
