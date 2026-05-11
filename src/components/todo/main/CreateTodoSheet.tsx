@@ -53,6 +53,7 @@ import {
 } from "@/hooks/mutations/useTodo.mutation";
 import type { CreateTodoDTO } from "@/types/services/todo";
 import Loader from "@/utils/Loader";
+import { useGetUserTagsQuery } from "@/hooks/queries/useUserTag.queries";
 
 export function CreateTodoModal() {
   const { isOpen, closeModal, prefilledStatus, todoToEdit } = useTodoModal();
@@ -96,6 +97,12 @@ export function CreateTodoModal() {
   const createTodoMutation = useCreateTodoMutation();
   const updateTodoMutation = useUpdateTodoMutation();
   const deleteTodoMutation = useDeleteTodoMutation();
+  const { data: userTags = [], } =
+    useGetUserTagsQuery();
+
+  const availableTags = todoToEdit
+    ? Array.from(new Set([...userTags?., ...(todoToEdit.tags ?? [])]))
+    : userTags;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -159,17 +166,25 @@ export function CreateTodoModal() {
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg rounded-md" showCloseButton={!createTodoMutation.isPending && !updateTodoMutation.isPending}>
+      <DialogContent
+        className="w-[calc(100%-1rem)] max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-lg rounded-md"
+        showCloseButton={
+          !createTodoMutation.isPending && !updateTodoMutation.isPending
+        }
+      >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-linear-to-b from-primary/10 to-transparent rounded-t-md" />
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-3 sm:gap-6"
+        >
           <DialogHeader className="gap-1">
-            <DialogTitle className="flex items-center text-xl font-semibold tracking-tight">
-              <Sparkles className="size-5 text-primary pr-1" />
+            <DialogTitle className="flex items-center text-lg sm:text-xl font-semibold tracking-tight">
+              <Sparkles className="size-4 sm:size-5 text-primary pr-1" />
               {todoToEdit ? "Edit Todo" : "Create Todo"}
             </DialogTitle>
 
-            <DialogDescription className="text-sm tracking-tight">
+            <DialogDescription className="text-xs sm:text-sm tracking-tight">
               {todoToEdit
                 ? "Update the task details, status, or due date."
                 : "Plan your next task with priority, deadline, and tags."}
@@ -177,8 +192,8 @@ export function CreateTodoModal() {
           </DialogHeader>
 
           {/* TITLE */}
-          <div className="space-y-2">
-            <Label htmlFor="title">
+          <div className="space-y-1 sm:space-y-2">
+            <Label htmlFor="title" className="text-xs sm:text-sm">
               Title <span className="text-red-500">*</span>
             </Label>
 
@@ -186,6 +201,7 @@ export function CreateTodoModal() {
               id="title"
               placeholder="What needs to be done?"
               maxLength={100}
+              className="h-10 sm:h-9"
               {...register("title", {
                 required: "Title is required",
                 validate: (value) =>
@@ -199,8 +215,8 @@ export function CreateTodoModal() {
           </div>
 
           {/* DESCRIPTION */}
-          <div className="space-y-2">
-            <Label>Description</Label>
+          <div className="space-y-1 sm:space-y-2">
+            <Label className="text-xs sm:text-sm">Description</Label>
 
             <Controller
               control={control}
@@ -212,6 +228,7 @@ export function CreateTodoModal() {
                   render={({ field: tagsField }) => (
                     <TagEditor
                       value={field.value ?? ""}
+                      availableTags={availableTags}
                       onChange={(newValue, newTags) => {
                         field.onChange(newValue);
                         tagsField.onChange(newTags);
@@ -230,7 +247,7 @@ export function CreateTodoModal() {
                   type="button"
                   variant="outline"
                   role="combobox"
-                  className="w-full justify-between py-1 h-auto flex-wrap hover:bg-transparent active:bg-transparent focus:*:bg-transparent"
+                  className="w-full justify-between py-2 sm:py-1 min-h-10 sm:h-auto flex-wrap hover:bg-transparent active:bg-transparent focus:*:bg-transparent"
                 >
                   <div className="flex gap-2 flex-wrap">
                     {selectedTags.length > 0 ? (
@@ -299,17 +316,17 @@ export function CreateTodoModal() {
           )}
 
           {/* PRIORITY + STATUS */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2">
             {/* PRIORITY */}
-            <div className="space-y-2 w-full">
-              <Label>Priority</Label>
+            <div className="space-y-1 sm:space-y-2 w-full">
+              <Label className="text-xs sm:text-sm">Priority</Label>
 
               <Controller
                 control={control}
                 name="priority"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full h-10 sm:h-9">
                       <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
 
@@ -328,15 +345,15 @@ export function CreateTodoModal() {
             </div>
 
             {/* STATUS */}
-            <div className="space-y-2 w-full">
-              <Label>Status</Label>
+            <div className="space-y-1 sm:space-y-2 w-full">
+              <Label className="text-xs sm:text-sm">Status</Label>
 
               <Controller
                 control={control}
                 name="status"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full h-10 sm:h-9">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
 
@@ -360,8 +377,8 @@ export function CreateTodoModal() {
 
           {/* DUE DATE */}
           {/* DUE DATE */}
-          <div className="space-y-2">
-            <Label>Due Date</Label>
+          <div className="space-y-1 sm:space-y-2">
+            <Label className="text-xs sm:text-sm">Due Date</Label>
 
             <Controller
               control={control}
@@ -375,7 +392,7 @@ export function CreateTodoModal() {
                       <Button
                         type="button"
                         variant="outline"
-                        className="w-full justify-start font-normal"
+                        className="w-full h-10 sm:h-9 justify-start font-normal"
                       >
                         {field.value
                           ? format(field.value, "PPP")
@@ -433,7 +450,7 @@ export function CreateTodoModal() {
             />
           </div>
 
-          <DialogFooter className="flex gap-2">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
             <Button
               type="button"
               variant="outline"
@@ -441,6 +458,7 @@ export function CreateTodoModal() {
                 createTodoMutation.isPending || updateTodoMutation.isPending
               }
               onClick={handleClose}
+              className="w-full sm:w-auto h-10 sm:h-9"
             >
               Cancel
             </Button>
@@ -450,6 +468,7 @@ export function CreateTodoModal() {
               disabled={
                 createTodoMutation.isPending || updateTodoMutation.isPending
               }
+              className="w-full sm:w-auto h-10 sm:h-9"
             >
               <Loader
                 isLoading={
@@ -468,6 +487,7 @@ export function CreateTodoModal() {
                 onClick={() => {
                   setShowDeleteConfirm(true);
                 }}
+                className="w-full sm:w-auto h-10 sm:h-9"
               >
                 <Loader
                   isLoading={deleteTodoMutation.isPending}

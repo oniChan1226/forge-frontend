@@ -4,19 +4,10 @@ import { WordProgressCircle } from "./WordProgressCircle";
 type Props = {
   value: string;
   onChange: (value: string, tags: string[]) => void;
+  availableTags?: string[];
   maxWords?: number;
   maxLength?: number;
 };
-
-const TAGS = [
-  "react",
-  "node",
-  "mongodb",
-  "typescript",
-  "idea",
-  "todo",
-  "design",
-];
 
 // const getWordProgress = (used: number, max: number) => {
 //   return Math.min((used / max) * 100, 100);
@@ -31,8 +22,23 @@ export function TagEditor({
   onChange,
   maxWords = 100,
   maxLength = 5000,
+  availableTags = [],
 }: Props) {
   const wordsUsed = countWords(value);
+  const TAGS = availableTags ?? [
+    "urgent",
+    "important",
+    "later",
+    "bug",
+    "feature",
+    "discussion",
+    "research",
+    "design",
+    "backend",
+    "frontend",
+  ];
+
+  console.log(TAGS)
 
   return (
     <div className="group relative rounded-md border border-border bg-card p-2 transition-all focus-within:ring-2 focus-within:ring-primary/50">

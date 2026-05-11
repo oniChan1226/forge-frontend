@@ -45,11 +45,6 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
     transition,
   };
 
-  const handleOnClick = () => {
-    if (isDragging) return;
-    openEditModal(task);
-  };
-
   return (
     <motion.div
       layout
@@ -75,7 +70,6 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
             : "shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing"
         }
       `}
-      onClick={handleOnClick}
     >
       <div className="flex items-center justify-between">
         <Badge
@@ -89,7 +83,8 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              onPointerDown={(event) => event.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="rounded-sm p-1 hover:bg-muted transition-colors"
             >
               <span className="sr-only">Open menu</span>
@@ -97,9 +92,16 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
             </button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="start" className="rounded-sm">
+          <DropdownMenuContent
+            align="start"
+            className="rounded-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
             <DropdownMenuItem
-              onClick={() => openEditModal(task)}
+              onClick={(e) => {
+                e.stopPropagation();
+                openEditModal(task);
+              }}
               className="text-sm"
             >
               <Edit className="mr-1" size={5} />
@@ -108,7 +110,8 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
 
             <DropdownMenuItem
               variant="destructive"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 setShowDeleteConfirm(true);
               }}
               className="text-sm"
