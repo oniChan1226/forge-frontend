@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatDueDate } from "@/utils/helpers";
+import { useDeleteTodoMutation } from "@/hooks/mutations/useTodo.mutation";
+import { useTodoModal } from "@/contexts/todo-modal-context";
 
 interface TaskCardProps {
   task: Todo;
@@ -20,6 +22,9 @@ interface TaskCardProps {
 }
 
 export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
+  const { openEditModal } = useTodoModal();
+  const deleteTodoMutation = useDeleteTodoMutation();
+
   const {
     attributes,
     listeners,
@@ -73,7 +78,11 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="rounded-sm p-1 hover:bg-muted transition-colors">
+            <button
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              className="rounded-sm p-1 hover:bg-muted transition-colors"
+            >
               <span className="sr-only">Open menu</span>
               <MoreHorizontal size={16} className="text-muted-foreground" />
             </button>
@@ -81,7 +90,7 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
 
           <DropdownMenuContent align="start" className="rounded-sm">
             <DropdownMenuItem
-              onClick={() => console.log("edit")}
+              onClick={() => openEditModal(task)}
               className="text-sm"
             >
               <Edit className="mr-1" size={5} />
@@ -89,8 +98,17 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
             </DropdownMenuItem>
 
             <DropdownMenuItem
-              onClick={() => console.log("delete")}
-              className="text-red-600 focus:text-red-600 text-sm"
+              variant="destructive"
+              onClick={async () => {
+                const confirmed = window.confirm(
+                  "Delete this todo? This cannot be undone.",
+                );
+
+                if (!confirmed) return;
+
+                await deleteTodoMutation.mutateAsync(task._id);
+              }}
+              className="text-sm"
             >
               <Trash className="mr-1" color="red" />
               Delete

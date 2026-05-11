@@ -24,6 +24,11 @@ export const TodoService = {
     return res.data;
   },
 
+  deleteTodo: async (id: string) => {
+    const res = await apiClient.delete(`${BaseRoute}/${id}`);
+    return res.data;
+  },
+
   moveTodo: async (payload: MoveTodoDTO) => {
     const res = await apiClient.post(`${BaseRoute}/${payload.todoId}/move`, payload);
     return res.data;

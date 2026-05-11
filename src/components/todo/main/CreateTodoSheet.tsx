@@ -1,8 +1,9 @@
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { format } from "date-fns";
 import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 import {
   Dialog,
@@ -25,6 +26,14 @@ import {
 } from "@/components/ui/select";
 
 import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -34,13 +43,27 @@ import { Calendar } from "@/components/ui/calendar";
 import { TagEditor } from "./TagInput";
 import { stripTagsFromDescription } from "@/utils/tag-helpers";
 import { useTodoModal } from "@/contexts/todo-modal-context";
-import { Sparkles } from "lucide-react";
-import { useCreateTodoMutation } from "@/hooks/mutations/useTodo.mutation";
+import { cn } from "@/lib/utils";
+import { Check, ChevronsUpDown, Sparkles, X } from "lucide-react";
+import {
+  useCreateTodoMutation,
+  useDeleteTodoMutation,
+  useUpdateTodoMutation,
+} from "@/hooks/mutations/useTodo.mutation";
 import type { CreateTodoDTO } from "@/types/services/todo";
 import Loader from "@/utils/Loader";
 
 export function CreateTodoModal() {
-  const { isOpen, closeModal, prefilledStatus } = useTodoModal();
+  const { isOpen, closeModal, prefilledStatus, todoToEdit } = useTodoModal();
+
+  const getFormDefaults = () => ({
+    title: todoToEdit?.title ?? "",
+    description: todoToEdit?.description ?? "",
+    priority: todoToEdit?.priority ?? "low",
+    status: todoToEdit?.status ?? prefilledStatus ?? "backlog",
+    dueDate: todoToEdit?.dueDate ? new Date(todoToEdit.dueDate) : undefined,
+    tags: todoToEdit?.tags ?? [],
+  });
 
   const {
     register,
@@ -50,26 +73,50 @@ export function CreateTodoModal() {
     setValue,
     formState: { errors },
   } = useForm<CreateTodoDTO>({
-    defaultValues: {
+    defaultValues: getFormDefaults(),
+  });
+
+  const selectedTags = useWatch({ control, name: "tags" }) ?? [];
+
+  const toggleTag = (tag: string) => {
+    const isSelected = selectedTags.includes(tag);
+    const nextTags = isSelected
+      ? selectedTags.filter((selectedTag) => selectedTag !== tag)
+      : [...selectedTags, tag];
+
+    setValue("tags", nextTags, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
+  };
+
+  const createTodoMutation = useCreateTodoMutation();
+  const updateTodoMutation = useUpdateTodoMutation();
+  const deleteTodoMutation = useDeleteTodoMutation();
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    reset({
+      title: todoToEdit?.title ?? "",
+      description: todoToEdit?.description ?? "",
+      priority: todoToEdit?.priority ?? "low",
+      status: todoToEdit?.status ?? prefilledStatus ?? "backlog",
+      dueDate: todoToEdit?.dueDate ? new Date(todoToEdit.dueDate) : undefined,
+      tags: todoToEdit?.tags ?? [],
+    });
+  }, [isOpen, prefilledStatus, todoToEdit, reset]);
+
+  const handleClose = () => {
+    reset({
       title: "",
       description: "",
       priority: "low",
-      status: prefilledStatus ?? "backlog",
+      status: "backlog",
       dueDate: undefined,
       tags: [],
-    },
-  });
-
-  const createTodoMutation = useCreateTodoMutation();
-
-  useEffect(() => {
-    if (prefilledStatus) {
-      setValue("status", prefilledStatus);
-    }
-  }, [prefilledStatus, setValue]);
-
-  const handleClose = () => {
-    reset();
+    });
     closeModal();
   };
 
@@ -85,7 +132,14 @@ export function CreateTodoModal() {
         description: cleanDescription,
       };
 
-      await createTodoMutation.mutateAsync(payload);
+      if (todoToEdit) {
+        await updateTodoMutation.mutateAsync({
+          id: todoToEdit._id,
+          data: payload,
+        });
+      } else {
+        await createTodoMutation.mutateAsync(payload);
+      }
 
       handleClose();
     } catch (err) {
@@ -110,11 +164,13 @@ export function CreateTodoModal() {
           <DialogHeader className="gap-1">
             <DialogTitle className="flex items-center text-xl font-semibold tracking-tight">
               <Sparkles className="size-5 text-primary pr-1" />
-              Create Todo
+              {todoToEdit ? "Edit Todo" : "Create Todo"}
             </DialogTitle>
 
             <DialogDescription className="text-sm tracking-tight">
-              Plan your next task with priority, deadline, and tags.
+              {todoToEdit
+                ? "Update the task details, status, or due date."
+                : "Plan your next task with priority, deadline, and tags."}
             </DialogDescription>
           </DialogHeader>
 
@@ -164,6 +220,81 @@ export function CreateTodoModal() {
               )}
             />
           </div>
+
+          {todoToEdit && todoToEdit.tags.length > 0 && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between py-1 h-auto flex-wrap hover:bg-transparent active:bg-transparent focus:*:bg-transparent"
+                >
+                  <div className="flex gap-2 flex-wrap">
+                    {selectedTags.length > 0 ? (
+                      selectedTags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          {tag}
+
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleTag(tag);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <X className="h-3 w-3" />
+                          </span>
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-muted-foreground">Select Tags</span>
+                    )}
+                  </div>
+
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent
+                align="start"
+                className="w-(--radix-popover-trigger-width) p-0"
+              >
+                <Command>
+                  <CommandInput placeholder="Search tags..." />
+
+                  <CommandEmpty>No tag found.</CommandEmpty>
+
+                  <CommandGroup>
+                    {todoToEdit.tags.map((tag) => {
+                      const isSelected = selectedTags.includes(tag);
+
+                      return (
+                        <CommandItem
+                          key={tag}
+                          value={tag}
+                          onSelect={() => toggleTag(tag)}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              isSelected ? "opacity-100" : "opacity-0",
+                            )}
+                          />
+
+                          {tag}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          )}
 
           {/* PRIORITY + STATUS */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -304,19 +435,52 @@ export function CreateTodoModal() {
             <Button
               type="button"
               variant="outline"
-              disabled={createTodoMutation.isPending}
+              disabled={
+                createTodoMutation.isPending || updateTodoMutation.isPending
+              }
               onClick={handleClose}
             >
               Cancel
             </Button>
 
-            <Button type="submit" disabled={createTodoMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={
+                createTodoMutation.isPending || updateTodoMutation.isPending
+              }
+            >
               <Loader
-                isLoading={createTodoMutation.isPending}
-                loadedText="Create Todo"
-                loadingText="Creating..."
+                isLoading={
+                  createTodoMutation.isPending || updateTodoMutation.isPending
+                }
+                loadedText={todoToEdit ? "Save Changes" : "Create Todo"}
+                loadingText={todoToEdit ? "Saving..." : "Creating..."}
               />
             </Button>
+
+            {todoToEdit && (
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={deleteTodoMutation.isPending}
+                onClick={async () => {
+                  const confirmed = window.confirm(
+                    "Delete this todo? This cannot be undone.",
+                  );
+
+                  if (!confirmed) return;
+
+                  await deleteTodoMutation.mutateAsync(todoToEdit._id);
+                  handleClose();
+                }}
+              >
+                <Loader
+                  isLoading={deleteTodoMutation.isPending}
+                  loadedText="Delete"
+                  loadingText="Deleting..."
+                />
+              </Button>
+            )}
           </DialogFooter>
         </form>
       </DialogContent>

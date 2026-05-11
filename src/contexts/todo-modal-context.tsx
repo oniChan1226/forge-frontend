@@ -1,10 +1,13 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import type { ColumnStatus } from "@/components/todo/views/view-config";
+import type { Todo } from "@/types/services/todo";
 
 interface TodoModalContextType {
   isOpen: boolean;
   prefilledStatus?: ColumnStatus;
+  todoToEdit: Todo | null;
   openCreateModal: (status?: ColumnStatus) => void;
+  openEditModal: (todo: Todo) => void;
   closeModal: () => void;
 }
 
@@ -13,15 +16,24 @@ const TodoModalContext = createContext<TodoModalContextType | undefined>(undefin
 export function TodoModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [prefilledStatus, setPrefilledStatus] = useState<ColumnStatus | undefined>();
+  const [todoToEdit, setTodoToEdit] = useState<Todo | null>(null);
 
   const openCreateModal = (status?: ColumnStatus) => {
+    setTodoToEdit(null);
     setPrefilledStatus(status);
+    setIsOpen(true);
+  };
+
+  const openEditModal = (todo: Todo) => {
+    setTodoToEdit(todo);
+    setPrefilledStatus(todo.status);
     setIsOpen(true);
   };
 
   const closeModal = () => {
     setIsOpen(false);
     setPrefilledStatus(undefined);
+    setTodoToEdit(null);
   };
 
   return (
@@ -29,7 +41,9 @@ export function TodoModalProvider({ children }: { children: ReactNode }) {
       value={{
         isOpen,
         prefilledStatus,
+        todoToEdit,
         openCreateModal,
+        openEditModal,
         closeModal,
       }}
     >
