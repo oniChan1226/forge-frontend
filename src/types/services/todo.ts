@@ -9,6 +9,8 @@ export type Todo = {
   priority: "low" | "medium" | "high" | "urgent";
   tags: string[];
   dueDate?: Date | null;
+  isCompleted: boolean;
+  completedAt?: Date | null;
   position: number;
   createdAt: string;
   updatedAt: string;

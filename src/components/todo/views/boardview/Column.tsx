@@ -56,7 +56,12 @@ export default function Column({ status, tasks }: ColumnProps) {
           strategy={verticalListSortingStrategy}
         >
           {tasks.map((task) => (
-            <TaskCard key={task._id} task={task} />
+            <TaskCard
+              key={task._id}
+              task={task}
+              isDone={task.isCompleted && task.status === "done"}
+              isOverlay={false}
+            />
           ))}
         </SortableContext>
 

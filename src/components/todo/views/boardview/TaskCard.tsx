@@ -5,7 +5,8 @@ import { useState } from "react";
 import type { Todo } from "@/types/services/todo";
 import { Badge } from "@/components/ui/badge";
 import { priorityBadgeStyles, priorityOptionsMap } from "../view-config";
-import { MoreHorizontal, Edit, Trash, Clock } from "lucide-react";
+import { MoreHorizontal, Edit, Trash, Clock, Check, CheckCircle } from "lucide-react";
+import { format } from "date-fns";
 import { TooltipWrapper } from "@/components/generic/TooltipWrapper";
 import { ConfirmActionModal } from "@/components/generic/ConfirmActionModal";
 import {
@@ -20,10 +21,16 @@ import { useTodoModal } from "@/contexts/todo-modal-context";
 
 interface TaskCardProps {
   task: Todo;
+  isDone?: boolean;
   isOverlay?: boolean;
 }
 
-export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
+export default function TaskCard({
+  task,
+  isDone = false,
+  isOverlay = false,
+}: TaskCardProps) {
+  const done = isDone || task.isCompleted || task.status === "done";
   const { openEditModal } = useTodoModal();
   const deleteTodoMutation = useDeleteTodoMutation();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -63,7 +70,8 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
         damping: 35,
       }}
       className={`
-        rounded-sm border border-transparent hover:border-primary/20 bg-white/70 dark:bg-card p-3 text-card-foreground backdrop-blur-sm select-none will-change-transform
+        rounded-sm border border-transparent hover:border-primary/20  dark:bg-card p-3 text-card-foreground backdrop-blur-sm select-none will-change-transform
+        ${done ? "bg-muted/70 opacity-90" : "bg-white/50"}
         ${
           isOverlay
             ? "shadow-xl cursor-grabbing"
@@ -76,51 +84,63 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
           variant="secondary"
           className={`capitalize text-xs mb-2 rounded-xs ${priorityBadgeStyles[task.priority]}`}
         >
-          ! {priorityOptionsMap[task.priority]}
+          <span className={done ? "line-through opacity-60" : ""}>
+            ! {priorityOptionsMap[task.priority]}
+          </span>
         </Badge>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
-              className="rounded-sm p-1 hover:bg-muted transition-colors"
-            >
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal size={16} className="text-muted-foreground" />
-            </button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent
-            align="start"
-            className="rounded-sm"
-            onClick={(e) => e.stopPropagation()}
+        {done ? (
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            className="rounded-sm p-1"
+            aria-label="Completed"
           >
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                openEditModal(task);
-              }}
-              className="text-sm"
-            >
-              <Edit className="mr-1" size={5} />
-              Edit
-            </DropdownMenuItem>
+            <CheckCircle className="h-5 w-5 text-green-500" />
+          </button>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                className="rounded-sm p-1 hover:bg-muted transition-colors"
+              >
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal size={16} className="text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
 
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDeleteConfirm(true);
-              }}
-              className="text-sm"
+            <DropdownMenuContent
+              align="start"
+              className="rounded-sm"
+              onClick={(e) => e.stopPropagation()}
             >
-              <Trash className="mr-1" color="red" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openEditModal(task);
+                }}
+                className="text-sm"
+              >
+                <Edit className="mr-1" size={5} />
+                Edit
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteConfirm(true);
+                }}
+                className="text-sm"
+              >
+                <Trash className="mr-1" color="red" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
       <div>
         <h6 className="text-sm text-foreground font-medium max-w-xs truncate">
@@ -162,13 +182,22 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
       </div>
 
       <div className="mt-2">
-        {task.dueDate && (
-          <TooltipWrapper tip={formatDueDate(task.dueDate).human}>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground cursor-default">
-              <Clock className="h-3.5 w-3.5" />
-              <span>{formatDueDate(task.dueDate).relative}</span>
-            </div>
-          </TooltipWrapper>
+        {done ? (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground cursor-default">
+            <Check className="h-3.5 w-3.5 text-green-500" />
+            <span>
+              Closed {format(new Date(task.completedAt ?? task.updatedAt ?? task.dueDate), "MMM d")}
+            </span>
+          </div>
+        ) : (
+          task.dueDate && (
+            <TooltipWrapper tip={formatDueDate(task.dueDate).human}>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground cursor-default">
+                <Clock className="h-3.5 w-3.5" />
+                <span>{formatDueDate(task.dueDate).relative}</span>
+              </div>
+            </TooltipWrapper>
+          )
         )}
       </div>
 
