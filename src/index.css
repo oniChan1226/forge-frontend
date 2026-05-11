@@ -125,7 +125,6 @@
 
   --tag-foreground: oklch(0.62 0.15 45.5);
   --tag-background: oklch(0.62 0.15 45.5 / 0.12);
-
 }
 
 .dark {
@@ -188,9 +187,9 @@
   * {
     @apply border-border outline-ring/50;
   }
- body {
-  @apply bg-background text-foreground transition-colors duration-300;
-}
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
   html {
     @apply font-sans;
   }
