@@ -7,7 +7,7 @@ interface PageTitleProps {
 export const PageTitle = ({ title, subtitle, highlight }: PageTitleProps) => {
   return (
     <div>
-      <h1 className="text-2xl md:text-3xl font-bold font-eb-garamond">
+      <h1 className="text-2xl md:text-3xl font-bold">
         {title}
       </h1>
 

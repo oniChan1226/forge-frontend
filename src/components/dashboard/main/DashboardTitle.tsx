@@ -9,7 +9,7 @@ const DashboardTitle = ({ className }: DashboardTitleProps) => {
   const user = data?.data;
   return (
     <div className={className}>
-      <h1 className="text-2xl sm:text-3xl font-bold capitalize text-wrap truncate font-eb-garamond">
+      <h1 className="text-2xl sm:text-3xl font-bold capitalize text-wrap truncate">
         Good morning, {isLoading ? "Loading..." : user?.name || "there"}
         {/* <span className="text-xl pl-2 inline-block">👋</span> */}
       </h1>
