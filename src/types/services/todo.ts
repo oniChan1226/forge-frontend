@@ -26,3 +26,11 @@ export type MoveTodoDTO = {
     afterId?: string;
   };
 };
+
+export type GetTodoQueryParams = {
+  page?: number;
+  limit?: number;
+  status?: "backlog" | "in-progress" | "in-review" | "done";
+  priority?: "low" | "medium" | "high" | "urgent";
+  tags?: string[];
+}

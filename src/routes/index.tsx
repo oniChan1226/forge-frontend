@@ -7,6 +7,7 @@ import { AuthRoute } from "./AuthRoute";
 import { DashboardRoute } from "./DashboardRoute";
 import { ROUTE_PATHS } from "./route-paths";
 import TodoPage from "@/pages/protected/TodoPage";
+import NotesPage from "@/pages/protected/NotesPage";
 
 export const appRoutes = [
   {
@@ -38,6 +39,14 @@ export const appRoutes = [
     element: (
       <DashboardRoute>
         <TodoPage />
+      </DashboardRoute>
+    ),
+  },
+  {
+    path: ROUTE_PATHS.notes,
+    element: (
+      <DashboardRoute>
+        <NotesPage />
       </DashboardRoute>
     ),
   },

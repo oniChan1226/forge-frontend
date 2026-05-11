@@ -1,11 +1,11 @@
-import type { CreateTodoDTO, MoveTodoDTO } from "@/types/services/todo";
+import type { CreateTodoDTO, GetTodoQueryParams, MoveTodoDTO } from "@/types/services/todo";
 import { apiClient } from ".";
 
 const BaseRoute = "/users/todos";
 
 export const TodoService = {
-  getTodos: async () => {
-    const res = await apiClient.get(`${BaseRoute}/`);
+  getTodos: async (params?: GetTodoQueryParams) => {
+    const res = await apiClient.get(`${BaseRoute}/`, { params });
     return res.data;
   },
 

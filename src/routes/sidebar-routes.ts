@@ -1,11 +1,11 @@
 // sidebar.routes.ts
 import {
   LayoutDashboard,
-  CheckSquare,
   FolderKanban,
   CalendarDays,
   ListTodo,
   Settings,
+  FileText,
 } from "lucide-react";
 
 export const sidebarRoutes = [
@@ -20,9 +20,9 @@ export const sidebarRoutes = [
     icon: ListTodo,
   },
   {
-    label: "Tasks",
-    to: "/tasks",
-    icon: CheckSquare,
+    label: "Notes",
+    to: "/notes",
+    icon: FileText,
   },
   {
     label: "Projects",

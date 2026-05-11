@@ -23,7 +23,7 @@ import { useGetTodosQuery } from "@/hooks/queries/useTodo.queries";
 import { useMoveTodoMutation } from "@/hooks/mutations/useTodo.mutation";
 
 export default function BoardView() {
-  const { data: tasks = [] } = useGetTodosQuery();
+  const { data: tasks = [] } = useGetTodosQuery({ page: 1, limit: 100 });
   const [localTasks, setLocalTasks] = useState<Todo[] | null>(null);
   const boardTasks = useMemo<Todo[]>(() => {
     const src = (localTasks ?? tasks) as unknown;
