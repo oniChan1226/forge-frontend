@@ -485,7 +485,7 @@ export function CreateTodoModal() {
             onOpenChange={setShowDeleteConfirm}
             title="Delete this todo?"
             description="This action cannot be undone and will permanently remove this task."
-            confirmLabel="Delete Todo"
+            confirmLabel="Delete"
             onConfirm={async () => {
               await deleteTodoMutation.mutateAsync(todoToEdit._id);
               setShowDeleteConfirm(false);

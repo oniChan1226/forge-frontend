@@ -195,3 +195,13 @@
     @apply font-sans;
   }
 }
+
+::selection {
+  background: oklch(0.78 0.03 85 / 0.35); /* warm sand wash */
+  color: oklch(0.25 0.02 45); /* deep desert text */
+}
+
+.dark ::selection {
+  background: oklch(0.35 0.03 85 / 0.35); /* muted sand overlay */
+  color: oklch(0.92 0.01 85); /* soft text */
+}

@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import Loader from "@/utils/Loader";
 
 interface ConfirmActionModalProps {
   open: boolean;
@@ -29,10 +30,21 @@ export function ConfirmActionModal({
   onConfirm,
   isConfirming = false,
 }: ConfirmActionModalProps) {
+  const handleOpenChange = (nextOpen: boolean) => {
+    // Keep the modal locked while the destructive action is in flight.
+    if (isConfirming && !nextOpen) return;
+    onOpenChange(nextOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" showCloseButton={!isConfirming}>
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b from-destructive/12 to-transparent" />
+    <Dialog open={open} onOpenChange={handleOpenChange} modal>
+      <DialogContent
+        className="sm:max-w-md z-80 rounded-md"
+        showCloseButton={!isConfirming}
+        onPointerDownOutside={(event) => event.preventDefault()}
+        onInteractOutside={(event) => event.preventDefault()}
+      >
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b from-destructive/12 to-transparent rounded-md" />
 
         <DialogHeader className="gap-1">
           <DialogTitle>{title}</DialogTitle>
@@ -43,7 +55,7 @@ export function ConfirmActionModal({
           <Button
             type="button"
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
             disabled={isConfirming}
           >
             {cancelLabel}
@@ -55,7 +67,7 @@ export function ConfirmActionModal({
             onClick={onConfirm}
             disabled={isConfirming}
           >
-            {isConfirming ? "Deleting..." : confirmLabel}
+            <Loader isLoading={isConfirming} loadedText={confirmLabel} loadingText={confirmLabel + "..."}/>
           </Button>
         </DialogFooter>
       </DialogContent>

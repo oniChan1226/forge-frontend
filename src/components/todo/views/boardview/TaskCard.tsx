@@ -45,6 +45,11 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
     transition,
   };
 
+  const handleOnClick = () => {
+    if (isDragging) return;
+    openEditModal(task);
+  };
+
   return (
     <motion.div
       layout
@@ -70,6 +75,7 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
             : "shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing"
         }
       `}
+      onClick={handleOnClick}
     >
       <div className="flex items-center justify-between">
         <Badge
@@ -168,7 +174,7 @@ export default function TaskCard({ task, isOverlay = false }: TaskCardProps) {
         onOpenChange={setShowDeleteConfirm}
         title="Delete this todo?"
         description="This action cannot be undone and will permanently remove this task."
-        confirmLabel="Delete Todo"
+        confirmLabel="Delete"
         onConfirm={async () => {
           await deleteTodoMutation.mutateAsync(task._id);
           setShowDeleteConfirm(false);
