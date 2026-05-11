@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -33,7 +33,8 @@ const emptyEditorHtml = "<p></p>";
 
 export function NotesEditor() {
   const { selectedNote, updateNote } = useNotesWorkspace();
-  const [hasLoadedContent, setHasLoadedContent] = useState(false);
+  // flag no longer needed once we focus during initial setContent
+  // keep lastSyncedNoteId to avoid resetting content repeatedly
   const lastSyncedNoteId = useRef<string | null>(null);
   const selectedNoteRef = useRef(selectedNote);
   const updateNoteRef = useRef(updateNote);
@@ -99,17 +100,23 @@ export function NotesEditor() {
         emitUpdate: false,
       });
       lastSyncedNoteId.current = selectedNote.id;
-      setHasLoadedContent(true);
+
+      // Focus at end only on initial load for this note
+      editor.commands.focus("end");
     }
   }, [editor, selectedNote]);
 
-  useEffect(() => {
-    if (!editor || !selectedNote) return;
-
-    if (hasLoadedContent && lastSyncedNoteId.current === selectedNote.id) {
-      editor.commands.focus("end");
-    }
-  }, [editor, hasLoadedContent, selectedNote]);
+  // Debounced title save (uncontrolled input below uses defaultValue + key)
+  const titleDebounceRef = useRef<number | undefined>(undefined);
+  const scheduleTitleSave = (next: string) => {
+    if (titleDebounceRef.current !== undefined) clearTimeout(titleDebounceRef.current);
+    titleDebounceRef.current = window.setTimeout(() => {
+      const active = selectedNoteRef.current;
+      if (!active) return;
+      updateNoteRef.current(active.id, { title: next });
+      titleDebounceRef.current = undefined;
+    }, 400);
+  };
 
   if (!selectedNote) {
     return (
@@ -150,10 +157,9 @@ export function NotesEditor() {
         <div className="space-y-2">
           <input
             id="note-title"
-            value={selectedNote.title}
-            onChange={(event) =>
-              updateNote(selectedNote.id, { title: event.target.value })
-            }
+            key={selectedNote.id}
+            defaultValue={selectedNote.title}
+            onChange={(event) => scheduleTitleSave(event.target.value)}
             placeholder="Untitled note"
             className="w-full py-1 bg-transparent border-0 ring-0 outline-none focus:outline-none focus:ring-0 text-2xl md:text-3xl font-bold tracking-tight text-foreground"
           />
