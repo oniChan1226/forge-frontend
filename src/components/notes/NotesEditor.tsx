@@ -320,7 +320,7 @@ export function NotesEditor() {
 
         <div className="border-t border-border my-2" />
 
-        <div className="flex-1 min-h-0 overflow-y-auto bg-card">
+        <div className="flex-1 min-h-0 overflow-y-auto bg-card thin-scrollbar no-scrollbar-sm">
           <EditorContent editor={editor} />
         </div>
       </div>
