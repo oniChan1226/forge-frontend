@@ -124,7 +124,8 @@ export function NotesEditor() {
   // Debounced title save (uncontrolled input below uses defaultValue + key)
   const titleDebounceRef = useRef<number | undefined>(undefined);
   const scheduleTitleSave = (next: string) => {
-    if (titleDebounceRef.current !== undefined) clearTimeout(titleDebounceRef.current);
+    if (titleDebounceRef.current !== undefined)
+      clearTimeout(titleDebounceRef.current);
     titleDebounceRef.current = window.setTimeout(() => {
       const active = selectedNoteRef.current;
       if (!active) return;
@@ -165,7 +166,7 @@ export function NotesEditor() {
         </div>
       </div>
 
-      <div className="">
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden scrollbar-thin scrollbar-thumb-muted scrollbar-track-background">
         <div className="space-y-2">
           <input
             id="note-title"
@@ -315,10 +316,9 @@ export function NotesEditor() {
           >
             <RemoveFormatting className="h-4 w-4" />
           </Button>
-
         </div>
 
-        <div className="flex-1 border-t border-border my-2" />
+        <div className="border-t border-border my-2" />
 
         <div className="flex-1 min-h-0 overflow-y-auto bg-card">
           <EditorContent editor={editor} />
