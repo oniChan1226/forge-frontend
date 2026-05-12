@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -13,9 +13,8 @@ import {
   Heading2,
   Heading3,
   Italic,
+  Loader2,
   Link2,
-  List,
-  ListOrdered,
   MoreVertical,
   Quote,
   RemoveFormatting,
@@ -23,12 +22,14 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { useNotesWorkspace } from "@/contexts/notes-context";
+import { type NoteDocument, useNotesWorkspace } from "@/contexts/notes-context";
 
 const EDITOR_CLASS =
-  "min-h-[320px] bg-background py-3 text-sm leading-7 outline-none focus-visible:ring-0 prose max-w-none prose-p:my-2 prose-blockquote:border-l-primary/40 prose-blockquote:text-muted-foreground [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-4 [&_h1]:mb-2 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:mb-2 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1";
+  "min-h-[320px] bg-background py-3 text-sm leading-7 outline-none focus-visible:ring-0 prose max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-ul:pl-6 prose-ol:pl-6 prose-li:my-1 prose-blockquote:border-l-primary/40 prose-blockquote:text-muted-foreground [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-4 [&_h1]:mb-2 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:mb-2 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1";
 
 const emptyEditorHtml = "<p></p>";
+
+type NoteSavePatch = Partial<Pick<NoteDocument, "title" | "content" | "contentText" | "contentJson">>;
 
 export function NotesEditor() {
   const { selectedNote, updateNote } = useNotesWorkspace();
@@ -38,6 +39,10 @@ export function NotesEditor() {
   const lastSyncedNoteId = useRef<string | null>(null);
   const selectedNoteRef = useRef(selectedNote);
   const updateNoteRef = useRef(updateNote);
+  const saveTimerRef = useRef<number | undefined>(undefined);
+  const isSavingRef = useRef(false);
+  const pendingSaveRef = useRef<{ noteId: string; patch: NoteSavePatch } | null>(null);
+  const [saveState, setSaveState] = useState<"idle" | "debouncing" | "saving" | "error">("idle");
 
   useEffect(() => {
     selectedNoteRef.current = selectedNote;
@@ -46,6 +51,30 @@ export function NotesEditor() {
   useEffect(() => {
     updateNoteRef.current = updateNote;
   }, [updateNote]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current !== undefined) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    pendingSaveRef.current = null;
+    const resetTimer = window.setTimeout(() => {
+      setSaveState("idle");
+    }, 0);
+
+    if (saveTimerRef.current !== undefined) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = undefined;
+    }
+
+    return () => {
+      clearTimeout(resetTimer);
+    };
+  }, [selectedNote?.id]);
 
   const editor = useEditor(
     {
@@ -56,12 +85,12 @@ export function NotesEditor() {
           },
           bulletList: {
             HTMLAttributes: {
-              class: "list-disc list-inside",
+              class: "list-disc",
             },
           },
           orderedList: {
             HTMLAttributes: {
-              class: "list-decimal list-inside",
+              class: "list-decimal",
             },
           },
           codeBlock: {
@@ -99,8 +128,13 @@ export function NotesEditor() {
         const activeNote = selectedNoteRef.current;
         if (!activeNote) return;
 
-        updateNoteRef.current(activeNote.id, {
-          content: nextEditor.getHTML(),
+        const nextContent = nextEditor.getHTML();
+        const nextContentText = nextEditor.getText().trim() || nextContent;
+
+        queueNoteSave(activeNote.id, {
+          content: nextContent,
+          contentText: nextContentText,
+          contentJson: nextEditor.getJSON(),
         });
       },
     },
@@ -121,17 +155,64 @@ export function NotesEditor() {
     }
   }, [editor, selectedNote]);
 
-  // Debounced title save (uncontrolled input below uses defaultValue + key)
-  const titleDebounceRef = useRef<number | undefined>(undefined);
-  const scheduleTitleSave = (next: string) => {
-    if (titleDebounceRef.current !== undefined)
-      clearTimeout(titleDebounceRef.current);
-    titleDebounceRef.current = window.setTimeout(() => {
-      const active = selectedNoteRef.current;
-      if (!active) return;
-      updateNoteRef.current(active.id, { title: next });
-      titleDebounceRef.current = undefined;
-    }, 400);
+  const flushPendingSave = async () => {
+    const pending = pendingSaveRef.current;
+
+    if (!pending) {
+      setSaveState("idle");
+      return;
+    }
+
+    if (isSavingRef.current) {
+      saveTimerRef.current = window.setTimeout(() => {
+        void flushPendingSave();
+      }, 150);
+      return;
+    }
+
+    pendingSaveRef.current = null;
+    isSavingRef.current = true;
+    setSaveState("saving");
+
+    try {
+      await updateNoteRef.current(pending.noteId, pending.patch);
+      setSaveState("idle");
+    } catch (error) {
+      console.error("Failed to save note", error);
+      pendingSaveRef.current = pending;
+      setSaveState("error");
+    } finally {
+      isSavingRef.current = false;
+
+      if (pendingSaveRef.current) {
+        saveTimerRef.current = window.setTimeout(() => {
+          void flushPendingSave();
+        }, 150);
+      } else {
+        saveTimerRef.current = undefined;
+      }
+    }
+  };
+
+  // Debounced note saves keep typing responsive while reducing API traffic.
+  const queueNoteSave = (noteId: string, patch: NoteSavePatch) => {
+    pendingSaveRef.current = {
+      noteId,
+      patch: {
+        ...pendingSaveRef.current?.patch,
+        ...patch,
+      },
+    };
+
+    setSaveState("debouncing");
+
+    if (saveTimerRef.current !== undefined) {
+      clearTimeout(saveTimerRef.current);
+    }
+
+    saveTimerRef.current = window.setTimeout(() => {
+      void flushPendingSave();
+    }, 3000);
   };
 
   if (!selectedNote) {
@@ -172,7 +253,7 @@ export function NotesEditor() {
             id="note-title"
             key={selectedNote.id}
             defaultValue={selectedNote.title}
-            onChange={(event) => scheduleTitleSave(event.target.value)}
+            onChange={(event) => queueNoteSave(selectedNote.id, { title: event.target.value })}
             placeholder="Untitled note"
             className="w-full py-1 bg-transparent border-0 ring-0 outline-none focus:outline-none focus:ring-0 text-2xl md:text-3xl font-bold tracking-tight text-foreground"
           />
@@ -242,6 +323,8 @@ export function NotesEditor() {
 
           <div className="mx-1 hidden h-6 w-px bg-border md:block" />
 
+          {/* List controls are intentionally hidden for now until list UX is finalized. */}
+          {/*
           <Button
             type="button"
             variant={editor?.isActive("bulletList") ? "secondary" : "ghost"}
@@ -260,6 +343,7 @@ export function NotesEditor() {
           >
             <ListOrdered className="h-4 w-4" />
           </Button>
+          */}
           <Button
             type="button"
             variant={editor?.isActive("blockquote") ? "secondary" : "ghost"}
@@ -316,6 +400,34 @@ export function NotesEditor() {
           >
             <RemoveFormatting className="h-4 w-4" />
           </Button>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            {saveState === "saving" || saveState === "debouncing" ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+            ) : (
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            )}
+            <span>
+              {saveState === "saving"
+                ? "Saving note..."
+                : saveState === "debouncing"
+                  ? "Editing..."
+                  : saveState === "error"
+                    ? "Save failed"
+                    : "Saved"}
+            </span>
+          </div>
+          <span>
+            Last saved at{" "}
+            {selectedNote.updatedAt
+              ? new Date(selectedNote.updatedAt).toLocaleTimeString([], {
+                  hour: "numeric",
+                  minute: "2-digit",
+                })
+              : "--"}
+          </span>
         </div>
 
         <div className="border-t border-border my-2" />

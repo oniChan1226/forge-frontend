@@ -1,5 +1,5 @@
 import { NotesService } from "@/services/notes.service";
-import { useQuery } from "node_modules/@tanstack/react-query/build/modern/_tsup-dts-rollup";
+import { useQuery } from "@tanstack/react-query";
 
 export const useGetNotesQuery = () => {
   return useQuery({

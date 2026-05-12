@@ -1,11 +1,23 @@
-import { useMemo } from "react";
-import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { useEffect, useMemo, useState } from "react";
+
+import { useAuth } from "@/hooks/custom/useAuth";
+import { useCreateNoteMutation, useDeleteNoteMutation, useUpdateNoteMutation } from "@/hooks/mutations/useNotes.mutations";
+import { useGetNotesQuery } from "@/hooks/queries/useNotes.queries";
+import type { CreateUserNoteDTO, UserNotes } from "@/types/services/notes";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export type NoteDocument = {
   id: string;
   title: string;
   content: string;
+  contentText: string;
+  contentJson: unknown;
+  tags: string[];
+  isPinned: boolean;
+  isArchived: boolean;
+  isDeleted: boolean;
+  lastOpenedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -15,136 +27,100 @@ type NotesWorkspaceContextValue = {
   selectedNoteId: string | null;
   selectedNote: NoteDocument | null;
   selectNote: (id: string) => void;
-  createNote: () => NoteDocument;
-  updateNote: (id: string, patch: Partial<Pick<NoteDocument, "title" | "content">>) => void;
+  createNote: () => void;
+  updateNote: (
+    id: string,
+    patch: Partial<Pick<NoteDocument, "title" | "content" | "contentText" | "contentJson">>,
+  ) => Promise<void>;
   deleteNote: (id: string) => void;
   noteCount: number;
 };
 
-const STORAGE_KEY = "forge.notes.documents";
-
-const createInitialNotes = (): NoteDocument[] => {
-  const now = new Date().toISOString();
-
-  return [
-    {
-      id: "note-1",
-      title: "Product brief",
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Similique nostrum eaque cumque quo quod, quaerat consequatur doloribus placeat inventore necessitatibus vero. Illum illo, commodi, eos iusto consectetur distinctio officia, quis quae molestias nobis exercitationem rem officiis nam! Repudiandae facere cum sunt laudantium quis iure nesciunt.",
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      id: "note-2",
-      title: "Meeting recap",
-      content:
-        "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.</p><blockquote><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p></blockquote><p>Action items: follow up, review, and ship.</p>",
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      id: "note-3",
-      title: "Ideas backlog",
-      content:
-        "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sodales ligula in libero.</p><ol><li>Draft the outline</li><li>Add references</li><li>Polish the final copy</li></ol>",
-      createdAt: now,
-      updatedAt: now,
-    },
-  ];
+const EMPTY_EDITOR_DOC = {
+  type: "doc",
+  content: [{ type: "paragraph" }],
 };
 
-const createUntitledName = (notes: NoteDocument[]) => {
-  const suffix = notes.length + 1;
-  return suffix === 1 ? "Untitled note" : `Untitled note ${suffix}`;
-};
-
-type NotesWorkspaceStore = {
-  notes: NoteDocument[];
-  selectedNoteId: string | null;
-  selectNote: (id: string) => void;
-  createNote: () => NoteDocument;
-  updateNote: (
-    id: string,
-    patch: Partial<Pick<NoteDocument, "title" | "content">>,
-  ) => void;
-  deleteNote: (id: string) => void;
-};
-
-const initialNotes = createInitialNotes();
-
-const generateNoteId = () => {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
+const extractNotesData = (response: unknown): UserNotes[] => {
+  if (Array.isArray(response)) {
+    return response as UserNotes[];
   }
 
-  return `note-${Date.now()}`;
+  if (response && typeof response === "object" && "data" in response) {
+    const nested = (response as { data?: unknown }).data;
+
+    if (Array.isArray(nested)) {
+      return nested as UserNotes[];
+    }
+  }
+
+  return [];
 };
 
-const useNotesWorkspaceStore = create<NotesWorkspaceStore>()(
-  persist(
-    (set, get) => ({
-      notes: initialNotes,
-      selectedNoteId: initialNotes[0]?.id ?? null,
+const extractSingleNote = (response: unknown): UserNotes | null => {
+  if (!response) {
+    return null;
+  }
 
-      selectNote: (id) => set({ selectedNoteId: id }),
+  if (response && typeof response === "object" && "data" in response) {
+    const nested = (response as { data?: unknown }).data;
+    if (nested && typeof nested === "object" && !Array.isArray(nested)) {
+      return nested as UserNotes;
+    }
+  }
 
-      createNote: () => {
-        const now = new Date().toISOString();
-        const currentNotes = get().notes;
-        const newNote: NoteDocument = {
-          id: generateNoteId(),
-          title: createUntitledName(currentNotes),
-          content: "<p></p>",
-          createdAt: now,
-          updatedAt: now,
-        };
+  if (response && typeof response === "object" && !Array.isArray(response)) {
+    return response as UserNotes;
+  }
 
-        set((state) => ({
-          notes: [newNote, ...state.notes],
-          selectedNoteId: newNote.id,
-        }));
+  return null;
+};
 
-        return newNote;
-      },
+const htmlToPlainText = (html: string) => {
+  if (typeof DOMParser === "undefined") {
+    return html.replace(/<[^>]*>/g, "").trim();
+  }
 
-      updateNote: (id, patch) => {
-        const now = new Date().toISOString();
+  const parser = new DOMParser();
+  const document = parser.parseFromString(html, "text/html");
+  return document.body.textContent?.trim() ?? "";
+};
 
-        set((state) => ({
-          notes: state.notes.map((note) =>
-            note.id === id
-              ? {
-                  ...note,
-                  ...patch,
-                  updatedAt: now,
-                }
-              : note,
-          ),
-        }));
-      },
+const mapApiNote = (note: UserNotes): NoteDocument => ({
+  id: note._id,
+  title: note.title,
+  content: note.contentHtml,
+  contentText: note.contentText,
+  contentJson: note.contentJson,
+  tags: note.tags,
+  isPinned: note.isPinned,
+  isArchived: note.isArchived,
+  isDeleted: note.isDeleted,
+  lastOpenedAt: note.lastOpenedAt ? new Date(note.lastOpenedAt).toISOString() : null,
+  createdAt: new Date(note.createdAt).toISOString(),
+  updatedAt: new Date(note.updatedAt).toISOString(),
+});
 
-      deleteNote: (id) => {
-        set((state) => {
-          const nextNotes = state.notes.filter((note) => note.id !== id);
+const createNewNotePayload = (userId: string, notes: NoteDocument[]): CreateUserNoteDTO => {
+  const suffix = notes.length + 1;
+  const title = suffix === 1 ? "Untitled note" : `Untitled note ${suffix}`;
 
-          return {
-            notes: nextNotes,
-            selectedNoteId:
-              state.selectedNoteId === id
-                ? (nextNotes[0]?.id ?? null)
-                : state.selectedNoteId,
-          };
-        });
-      },
-    }),
-    {
-      name: STORAGE_KEY,
-      storage: createJSONStorage(() => localStorage),
-      version: 1,
+  return {
+    user: userId,
+    title,
+    contentText: title,
+    contentHtml: `<p>${title}</p>`,
+    contentJson: {
+      ...EMPTY_EDITOR_DOC,
+      content: [{ type: "paragraph", content: [{ type: "text", text: title }] }],
     },
-  ),
-);
+    tags: [],
+    isPinned: false,
+    isArchived: false,
+    isDeleted: false,
+    lastOpenedAt: new Date(),
+  };
+};
 
 export function NotesWorkspaceProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
@@ -152,23 +128,113 @@ export function NotesWorkspaceProvider({ children }: { children: React.ReactNode
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useNotesWorkspace(): NotesWorkspaceContextValue {
-  const notes = useNotesWorkspaceStore((state) => state.notes);
-  const selectedNoteId = useNotesWorkspaceStore((state) => state.selectedNoteId);
-  const selectNote = useNotesWorkspaceStore((state) => state.selectNote);
-  const createNote = useNotesWorkspaceStore((state) => state.createNote);
-  const updateNote = useNotesWorkspaceStore((state) => state.updateNote);
-  const deleteNote = useNotesWorkspaceStore((state) => state.deleteNote);
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const notesQuery = useGetNotesQuery();
+  const createNoteMutation = useCreateNoteMutation();
+  const updateNoteMutation = useUpdateNoteMutation();
+  const deleteNoteMutation = useDeleteNoteMutation();
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+
+  const rawNotes = extractNotesData(notesQuery.data);
+  const notes = useMemo(() => rawNotes.map(mapApiNote), [rawNotes]);
+
+  useEffect(() => {
+    if (notes.length === 0) {
+      setSelectedNoteId(null);
+      return;
+    }
+
+    if (!selectedNoteId || !notes.some((note) => note.id === selectedNoteId)) {
+      setSelectedNoteId(notes[0]?.id ?? null);
+    }
+  }, [notes, selectedNoteId]);
+
+  const selectNote = (id: string) => setSelectedNoteId(id);
+
+  const createNote = () => {
+    if (!user?._id) {
+      toast.error("You need to be signed in to create notes.");
+      return;
+    }
+
+    const payload = createNewNotePayload(user._id, notes);
+
+    createNoteMutation.mutate(payload, {
+      onSuccess: (response) => {
+        const created = extractSingleNote(response);
+
+        if (!created) {
+          queryClient.invalidateQueries({ queryKey: ["notes"] });
+          return;
+        }
+
+        queryClient.setQueryData(["notes"], (current: unknown) => {
+          const currentNotes = extractNotesData(current);
+          return [created, ...currentNotes.filter((note) => note._id !== created._id)];
+        });
+
+        setSelectedNoteId(created._id);
+      },
+    });
+  };
+
+  const updateNote = async (
+    id: string,
+    patch: Partial<Pick<NoteDocument, "title" | "content" | "contentText" | "contentJson">>,
+  ) => {
+    const apiPatch: Partial<CreateUserNoteDTO> = {};
+
+    if (patch.title !== undefined) {
+      apiPatch.title = patch.title;
+    }
+
+    if (patch.content !== undefined) {
+      const nextText = patch.contentText?.trim() || htmlToPlainText(patch.content) || patch.content;
+      apiPatch.contentHtml = patch.content;
+      apiPatch.contentText = nextText;
+      apiPatch.contentJson = patch.contentJson ?? EMPTY_EDITOR_DOC;
+    }
+
+    await updateNoteMutation.mutateAsync({ id, data: apiPatch });
+  };
+
+  const deleteNote = (id: string) => {
+    const nextSelectedId = (() => {
+      const nextNotes = notes.filter((note) => note.id !== id);
+      return selectedNoteId === id ? (nextNotes[0]?.id ?? null) : selectedNoteId;
+    })();
+
+    queryClient.setQueryData(["notes"], (current: unknown) => {
+      const currentNotes = extractNotesData(current);
+      return currentNotes.filter((note) => note._id !== id);
+    });
+
+    setSelectedNoteId(nextSelectedId);
+    deleteNoteMutation.mutate(id);
+  };
 
   const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null;
 
-  return useMemo(() => ({
-    notes,
-    selectedNoteId,
-    selectedNote,
-    selectNote,
-    createNote,
-    updateNote,
-    deleteNote,
-    noteCount: notes.length,
-  }), [notes, selectedNoteId, selectedNote, selectNote, createNote, updateNote, deleteNote]);
+  return useMemo(
+    () => ({
+      notes,
+      selectedNoteId,
+      selectedNote,
+      selectNote,
+      createNote,
+      updateNote,
+      deleteNote,
+      noteCount: notes.length,
+    }),
+    [
+      notes,
+      selectedNoteId,
+      selectedNote,
+      selectNote,
+      createNote,
+      updateNote,
+      deleteNote,
+    ],
+  );
 }

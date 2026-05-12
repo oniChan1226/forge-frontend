@@ -18,4 +18,14 @@ export const NotesService = {
     const res = await apiClient.get(`${BaseRoute}/${id}`);
     return res.data;
   },
+
+  updateNote: async (id: string, data: Partial<CreateUserNoteDTO>) => {
+    const res = await apiClient.put(`${BaseRoute}/${id}`, data);
+    return res.data;
+  },
+
+  deleteNote: async (id: string) => {
+    const res = await apiClient.delete(`${BaseRoute}/${id}`);
+    return res.data;
+  },
 };
