@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { type NoteDocument, useNotesWorkspace } from "@/contexts/notes-context";
 
 const EDITOR_CLASS =
-  "min-h-[320px] bg-background py-3 text-sm leading-7 outline-none focus-visible:ring-0 prose max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-ul:pl-6 prose-ol:pl-6 prose-li:my-1 prose-blockquote:border-l-primary/40 prose-blockquote:text-muted-foreground [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-4 [&_h1]:mb-2 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:mb-2 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1";
+  "bg-background py-3 text-sm leading-7 outline-none focus-visible:ring-0 prose max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-ul:pl-6 prose-ol:pl-6 prose-li:my-1 prose-blockquote:border-l-primary/40 prose-blockquote:text-muted-foreground [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-4 [&_h1]:mb-2 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:mb-2 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1";
 
 const emptyEditorHtml = "<p></p>";
 
@@ -128,7 +128,7 @@ export function NotesEditor() {
         if (!activeNote) return;
 
         const nextContent = nextEditor.getHTML();
-        const nextContentText = nextEditor.getText().trim() || nextContent;
+        const nextContentText = nextEditor.getText().trim();
 
         queueNoteSave(activeNote.id, {
           content: nextContent,
@@ -230,7 +230,7 @@ export function NotesEditor() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 p-4 lg:p-6">
+    <div className="flex h-full min-h-0 flex-col gap-4 p-4 lg:p-6 overflow-hidden">
       <div className="flex items-center justify-between ">
         <p className="text-xs text-primary tracking-wider font-semibold">
           ACTIVE DRAFT
@@ -246,13 +246,13 @@ export function NotesEditor() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 flex flex-col overflow-hidden scrollbar-thin scrollbar-thumb-muted scrollbar-track-background">
+      <div className="flex-1 min-h-0 flex flex-col overflow-y-auto thin-scrollbar no-scrollbar-sm">
         <div className="space-y-2">
           <input
             id="note-title"
             key={selectedNote.id}
             defaultValue={selectedNote.title}
-            onChange={(event) => queueNoteSave(selectedNote.id, { title: event.target.value })}
+            onChange={(event) => queueNoteSave(selectedNote.id, { title: event.target.value.trim() })}
             placeholder="Untitled note"
             className="w-full py-1 bg-transparent border-0 ring-0 outline-none focus:outline-none focus:ring-0 text-2xl md:text-3xl font-bold tracking-tight text-foreground"
           />
@@ -429,7 +429,7 @@ export function NotesEditor() {
 
         <div className="border-t border-border my-2" />
 
-        <div className="flex-1 min-h-0 overflow-y-auto bg-card thin-scrollbar no-scrollbar-sm">
+        <div className="flex-1 min-h-0">
           <EditorContent editor={editor} />
         </div>
       </div>

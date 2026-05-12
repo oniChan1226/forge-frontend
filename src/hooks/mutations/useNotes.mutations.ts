@@ -46,7 +46,14 @@ const patchNotesData = (
 
 export const useCreateNoteMutation = () => {
   return useMutation({
-    mutationFn: NotesService.createNote,
+    mutationFn: (data: Parameters<typeof NotesService.createNote>[0]) => {
+      const trimmedData = {
+        ...data,
+        title: data.title?.trim() || "",
+        contentText: data.contentText?.trim() || "",
+      };
+      return NotesService.createNote(trimmedData);
+    },
     onSuccess: () => {
       toast.success("Note created successfully!");
     },
@@ -67,7 +74,14 @@ export const useUpdateNoteMutation = () => {
     }: {
       id: string;
       data: Parameters<typeof NotesService.updateNote>[1];
-    }) => NotesService.updateNote(id, data),
+    }) => {
+      const trimmedData = {
+        ...data,
+        title: data.title?.trim(),
+        contentText: data.contentText?.trim(),
+      };
+      return NotesService.updateNote(id, trimmedData);
+    },
     onMutate: async ({ id, data }) => {
       await queryClient.cancelQueries({ queryKey: ["notes"] });
 
