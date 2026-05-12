@@ -1,6 +1,11 @@
 import { MentionsInput, Mention } from "react-mentions";
 import { WordProgressCircle } from "./WordProgressCircle";
 
+type MentionItem = {
+  id: string;
+  display: string;
+};
+
 type Props = {
   value: string;
   onChange: (value: string, tags: string[]) => void;
@@ -47,7 +52,12 @@ export function TagEditor({
         allowSuggestionsAboveCursor
         className="mentions-container text-wrap"
         maxLength={maxLength}
-        onChange={(_e, newValue, plainTextValue, mentions) => {
+        onChange={(
+          _e: unknown,
+          newValue: string,
+          plainTextValue: string,
+          mentions: MentionItem[],
+        ) => {
           const words = plainTextValue.trim().split(/\s+/).filter(Boolean);
 
           // ❌ BLOCK ANY INPUT THAT EXCEEDS LIMIT
@@ -57,7 +67,7 @@ export function TagEditor({
 
           onChange(
             newValue,
-            mentions.map((m) => m.id),
+            mentions.map((mention) => mention.id),
           );
         }}
         style={{
@@ -104,13 +114,13 @@ export function TagEditor({
         <Mention
           trigger="@"
           markup="@[__display__](__id__)"
-          displayTransform={(_, display) => `@${display}`}
+          displayTransform={(_id: string, display: string) => `@${display}`}
           className="mention-tag" // This class is applied in the HIGHLIGHTER
-          data={(search) => {
+          data={(search: string) => {
             // 1. Filter existing tags
             const filtered = TAGS.filter((tag) =>
               tag.toLowerCase().includes(search.toLowerCase()),
-            ).map((tag) => ({ id: tag, display: tag }));
+            ).map((tag) => ({ id: tag, display: tag })) as MentionItem[];
 
             // 2. If there's a search string and no exact match, add a "Create new" option
             if (search.length > 0 && !TAGS.includes(search)) {
