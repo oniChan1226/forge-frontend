@@ -45,12 +45,10 @@ const patchNotesData = (
 };
 
 export const useCreateNoteMutation = () => {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: NotesService.createNote,
     onSuccess: () => {
       toast.success("Note created successfully!");
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
     },
     onError: (error) => {
       console.error("Failed to create note", error);
@@ -63,8 +61,13 @@ export const useUpdateNoteMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof NotesService.updateNote>[1] }) =>
-      NotesService.updateNote(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Parameters<typeof NotesService.updateNote>[1];
+    }) => NotesService.updateNote(id, data),
     onMutate: async ({ id, data }) => {
       await queryClient.cancelQueries({ queryKey: ["notes"] });
 
@@ -86,20 +89,33 @@ export const useUpdateNoteMutation = () => {
       }
       toast.error("Failed to save note. Please try again.");
     },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["notes"] });
+    onSuccess: (response) => {
+      if (!response) return;
+
+      queryClient.setQueryData(["notes"], (current: NotesResponse) => {
+        const currentNotes = extractNotesData(current);
+        const nextNote =
+          response && typeof response === "object" && "data" in response
+            ? (response as { data?: Record<string, unknown> }).data
+            : (response as Record<string, unknown>);
+
+        if (!nextNote || !("_id" in nextNote)) {
+          return current;
+        }
+
+        return currentNotes.map((note) =>
+          note._id === nextNote._id ? nextNote : note,
+        );
+      });
     },
   });
 };
 
 export const useDeleteNoteMutation = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: NotesService.deleteNote,
     onSuccess: async () => {
       toast.success("Note deleted successfully!");
-      await queryClient.invalidateQueries({ queryKey: ["notes"] });
     },
     onError: (error) => {
       console.error("Failed to delete note", error);

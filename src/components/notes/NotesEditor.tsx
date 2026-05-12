@@ -33,7 +33,6 @@ type NoteSavePatch = Partial<Pick<NoteDocument, "title" | "content" | "contentTe
 
 export function NotesEditor() {
   const { selectedNote, updateNote } = useNotesWorkspace();
-  console.log("Selected note in editor:", selectedNote);
   // flag no longer needed once we focus during initial setContent
   // keep lastSyncedNoteId to avoid resetting content repeatedly
   const lastSyncedNoteId = useRef<string | null>(null);
@@ -42,7 +41,7 @@ export function NotesEditor() {
   const saveTimerRef = useRef<number | undefined>(undefined);
   const isSavingRef = useRef(false);
   const pendingSaveRef = useRef<{ noteId: string; patch: NoteSavePatch } | null>(null);
-  const [saveState, setSaveState] = useState<"idle" | "debouncing" | "saving" | "error">("idle");
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "error">("idle");
 
   useEffect(() => {
     selectedNoteRef.current = selectedNote;
@@ -204,7 +203,7 @@ export function NotesEditor() {
       },
     };
 
-    setSaveState("debouncing");
+    setSaveState("saving");
 
     if (saveTimerRef.current !== undefined) {
       clearTimeout(saveTimerRef.current);
@@ -404,7 +403,7 @@ export function NotesEditor() {
 
         <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
-            {saveState === "saving" || saveState === "debouncing" ? (
+            {saveState === "saving" ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
             ) : (
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
@@ -412,9 +411,7 @@ export function NotesEditor() {
             <span>
               {saveState === "saving"
                 ? "Saving note..."
-                : saveState === "debouncing"
-                  ? "Editing..."
-                  : saveState === "error"
+                : saveState === "error"
                     ? "Save failed"
                     : "Saved"}
             </span>

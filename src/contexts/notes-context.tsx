@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "@/hooks/custom/useAuth";
 import { useCreateNoteMutation, useDeleteNoteMutation, useUpdateNoteMutation } from "@/hooks/mutations/useNotes.mutations";
@@ -122,12 +122,9 @@ const createNewNotePayload = (userId: string, notes: NoteDocument[]): CreateUser
   };
 };
 
-export function NotesWorkspaceProvider({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
-}
+const NotesWorkspaceContext = createContext<NotesWorkspaceContextValue | null>(null);
 
-// eslint-disable-next-line react-refresh/only-export-components
-export function useNotesWorkspace(): NotesWorkspaceContextValue {
+function useNotesWorkspaceController(): NotesWorkspaceContextValue {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const notesQuery = useGetNotesQuery();
@@ -136,7 +133,7 @@ export function useNotesWorkspace(): NotesWorkspaceContextValue {
   const deleteNoteMutation = useDeleteNoteMutation();
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
-  const rawNotes = extractNotesData(notesQuery.data);
+  const rawNotes = useMemo(() => extractNotesData(notesQuery.data), [notesQuery.data]);
   const notes = useMemo(() => rawNotes.map(mapApiNote), [rawNotes]);
 
   useEffect(() => {
@@ -150,9 +147,9 @@ export function useNotesWorkspace(): NotesWorkspaceContextValue {
     }
   }, [notes, selectedNoteId]);
 
-  const selectNote = (id: string) => setSelectedNoteId(id);
+  const selectNote = useCallback((id: string) => setSelectedNoteId(id), []);
 
-  const createNote = () => {
+  const createNote = useCallback(() => {
     if (!user?._id) {
       toast.error("You need to be signed in to create notes.");
       return;
@@ -177,9 +174,9 @@ export function useNotesWorkspace(): NotesWorkspaceContextValue {
         setSelectedNoteId(created._id);
       },
     });
-  };
+  }, [createNoteMutation, notes, queryClient, user?._id]);
 
-  const updateNote = async (
+  const updateNote = useCallback(async (
     id: string,
     patch: Partial<Pick<NoteDocument, "title" | "content" | "contentText" | "contentJson">>,
   ) => {
@@ -197,9 +194,9 @@ export function useNotesWorkspace(): NotesWorkspaceContextValue {
     }
 
     await updateNoteMutation.mutateAsync({ id, data: apiPatch });
-  };
+  }, [updateNoteMutation]);
 
-  const deleteNote = (id: string) => {
+  const deleteNote = useCallback((id: string) => {
     const nextSelectedId = (() => {
       const nextNotes = notes.filter((note) => note.id !== id);
       return selectedNoteId === id ? (nextNotes[0]?.id ?? null) : selectedNoteId;
@@ -212,7 +209,7 @@ export function useNotesWorkspace(): NotesWorkspaceContextValue {
 
     setSelectedNoteId(nextSelectedId);
     deleteNoteMutation.mutate(id);
-  };
+  }, [deleteNoteMutation, notes, queryClient, selectedNoteId]);
 
   const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null;
 
@@ -237,4 +234,25 @@ export function useNotesWorkspace(): NotesWorkspaceContextValue {
       deleteNote,
     ],
   );
+}
+
+export function NotesWorkspaceProvider({ children }: { children: React.ReactNode }) {
+  const value = useNotesWorkspaceController();
+
+  return (
+    <NotesWorkspaceContext.Provider value={value}>
+      {children}
+    </NotesWorkspaceContext.Provider>
+  );
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function useNotesWorkspace(): NotesWorkspaceContextValue {
+  const context = useContext(NotesWorkspaceContext);
+
+  if (!context) {
+    throw new Error("useNotesWorkspace must be used within NotesWorkspaceProvider");
+  }
+
+  return context;
 }
