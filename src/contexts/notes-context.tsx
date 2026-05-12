@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -160,7 +161,7 @@ export function useNotesWorkspace(): NotesWorkspaceContextValue {
 
   const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null;
 
-  return {
+  return useMemo(() => ({
     notes,
     selectedNoteId,
     selectedNote,
@@ -169,5 +170,5 @@ export function useNotesWorkspace(): NotesWorkspaceContextValue {
     updateNote,
     deleteNote,
     noteCount: notes.length,
-  };
+  }), [notes, selectedNoteId, selectedNote, selectNote, createNote, updateNote, deleteNote]);
 }

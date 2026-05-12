@@ -204,3 +204,9 @@
   background: oklch(0.35 0.03 85 / 0.35); /* muted sand overlay */
   color: oklch(0.92 0.01 85); /* soft text */
 }
+
+.ProseMirror {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}

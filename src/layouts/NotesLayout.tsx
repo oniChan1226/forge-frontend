@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, memo, type JSX } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -17,13 +17,13 @@ type NotesLayoutProps = {
   children: React.ReactNode;
 };
 
-const NotesSidebar = ({
+const NotesSidebar = memo(function NotesSidebar({
   collapsed,
   onToggleCollapsed,
 }: {
   collapsed: boolean;
   onToggleCollapsed: () => void;
-}) => {
+}): JSX.Element {
   const { notes, selectedNoteId, selectNote, createNote, noteCount } =
     useNotesWorkspace();
 
@@ -130,9 +130,9 @@ const NotesSidebar = ({
       </div>
     </div>
   );
-};
+});
 
-const NotesLayoutContent = ({ children }: NotesLayoutProps) => {
+const NotesLayoutContent = memo(function NotesLayoutContent({ children }: NotesLayoutProps): JSX.Element {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -144,7 +144,7 @@ const NotesLayoutContent = ({ children }: NotesLayoutProps) => {
       </main>
     </div>
   );
-};
+});
 
 const NotesLayout = ({ children }: NotesLayoutProps) => {
   return (

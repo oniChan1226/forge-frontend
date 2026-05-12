@@ -18,21 +18,21 @@ import {
   ListOrdered,
   MoreVertical,
   Quote,
-  Redo2,
   RemoveFormatting,
   Share,
-  Strikethrough,
-  Underline as UnderlineIcon,
-  Undo2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useNotesWorkspace } from "@/contexts/notes-context";
 
+const EDITOR_CLASS =
+  "min-h-[320px] bg-background py-3 text-sm leading-7 outline-none focus-visible:ring-0 prose max-w-none prose-p:my-2 prose-blockquote:border-l-primary/40 prose-blockquote:text-muted-foreground [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-4 [&_h1]:mb-2 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:mb-2 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1";
+
 const emptyEditorHtml = "<p></p>";
 
 export function NotesEditor() {
   const { selectedNote, updateNote } = useNotesWorkspace();
+  console.log("Selected note in editor:", selectedNote);
   // flag no longer needed once we focus during initial setContent
   // keep lastSyncedNoteId to avoid resetting content repeatedly
   const lastSyncedNoteId = useRef<string | null>(null);
@@ -54,6 +54,22 @@ export function NotesEditor() {
           heading: {
             levels: [1, 2, 3],
           },
+          bulletList: {
+            HTMLAttributes: {
+              class: "list-disc list-inside",
+            },
+          },
+          orderedList: {
+            HTMLAttributes: {
+              class: "list-decimal list-inside",
+            },
+          },
+          codeBlock: {
+            HTMLAttributes: {
+              class: "bg-muted p-4 rounded-md font-mono text-sm",
+            },
+          },
+          listItem: {},
         }),
         Underline,
         Highlight,
@@ -76,8 +92,7 @@ export function NotesEditor() {
       immediatelyRender: false,
       editorProps: {
         attributes: {
-          class:
-            "min-h-[320px] bg-background  py-3 text-sm leading-7 outline-none focus-visible:ring-0 prose max-w-none prose-p:my-2 prose-blockquote:border-l-primary/40 prose-blockquote:text-muted-foreground [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-4 [&_h1]:mb-2 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:mb-2 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1",
+          class: EDITOR_CLASS,
         },
       },
       onUpdate: ({ editor: nextEditor }) => {
@@ -133,9 +148,6 @@ export function NotesEditor() {
     );
   }
 
-  const canUndo = editor?.can().undo() ?? false;
-  const canRedo = editor?.can().redo() ?? false;
-
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 p-4 lg:p-6">
       <div className="flex items-center justify-between ">
@@ -164,7 +176,7 @@ export function NotesEditor() {
             className="w-full py-1 bg-transparent border-0 ring-0 outline-none focus:outline-none focus:ring-0 text-2xl md:text-3xl font-bold tracking-tight text-foreground"
           />
         </div>
-        <div className="flex-1 border-t border-border my-2" />
+        <div className="border-t border-border my-2" />
 
         <div className="flex flex-wrap items-center text-sm gap-2 my-2">
           <Button
@@ -185,25 +197,6 @@ export function NotesEditor() {
           >
             <Italic className="h-4 w-4" />
           </Button>
-          <Button
-            type="button"
-            variant={editor?.isActive("underline") ? "secondary" : "ghost"}
-            size="icon-sm"
-            onClick={() => editor?.chain().focus().toggleUnderline().run()}
-            aria-label="Underline"
-          >
-            <UnderlineIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant={editor?.isActive("strike") ? "secondary" : "ghost"}
-            size="icon-sm"
-            onClick={() => editor?.chain().focus().toggleStrike().run()}
-            aria-label="Strike through"
-          >
-            <Strikethrough className="h-4 w-4" />
-          </Button>
-
           <div className="mx-1 hidden h-6 w-px bg-border md:block" />
 
           <Button
@@ -323,33 +316,11 @@ export function NotesEditor() {
             <RemoveFormatting className="h-4 w-4" />
           </Button>
 
-          <div className="mx-1 hidden h-6 w-px bg-border md:block" />
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => editor?.chain().focus().undo().run()}
-            disabled={!canUndo}
-            aria-label="Undo"
-          >
-            <Undo2 className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => editor?.chain().focus().redo().run()}
-            disabled={!canRedo}
-            aria-label="Redo"
-          >
-            <Redo2 className="h-4 w-4" />
-          </Button>
         </div>
 
         <div className="flex-1 border-t border-border my-2" />
 
-        <div className="min-h-0 overflow-y-auto bg-card">
+        <div className="flex-1 min-h-0 overflow-y-auto bg-card">
           <EditorContent editor={editor} />
         </div>
       </div>
