@@ -3,8 +3,8 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -18,6 +18,13 @@ import { useGetNotesQuery } from "@/hooks/queries/useNotes.queries";
 import type { CreateUserNoteDTO, UserNotes } from "@/types/services/notes";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  extractNotesQueryItems,
+  extractNotesQuerySummary,
+  prependNoteToNotesQueryData,
+  removeNoteFromNotesQueryData,
+} from "@/utils/notes-query-cache";
+import { useDebounce } from "@/utils/general";
 
 export type NoteDocument = {
   id: string;
@@ -38,6 +45,8 @@ type NotesWorkspaceContextValue = {
   notes: NoteDocument[];
   selectedNoteId: string | null;
   selectedNote: NoteDocument | null;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
   selectNote: (id: string) => void;
   createNote: () => void;
   updateNote: (
@@ -48,27 +57,14 @@ type NotesWorkspaceContextValue = {
   ) => Promise<void>;
   deleteNote: (id: string) => void;
   noteCount: number;
+  hasMoreNotes: boolean;
+  loadMoreNotes: () => void;
+  isLoadingMoreNotes: boolean;
 };
 
 const EMPTY_EDITOR_DOC = {
   type: "doc",
   content: [{ type: "paragraph" }],
-};
-
-const extractNotesData = (response: unknown): UserNotes[] => {
-  if (Array.isArray(response)) {
-    return response as UserNotes[];
-  }
-
-  if (response && typeof response === "object" && "data" in response) {
-    const nested = (response as { data?: unknown }).data;
-
-    if (Array.isArray(nested)) {
-      return nested as UserNotes[];
-    }
-  }
-
-  return [];
 };
 
 const extractSingleNote = (response: unknown): UserNotes | null => {
@@ -147,21 +143,46 @@ const NotesWorkspaceContext = createContext<NotesWorkspaceContextValue | null>(
   null,
 );
 
+const NOTES_PAGE_LIMIT = 20;
+
 function useNotesWorkspaceController(): NotesWorkspaceContextValue {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const notesQuery = useGetNotesQuery();
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 1000);
+  const notesQuery = useGetNotesQuery({
+    search: debouncedSearchTerm,
+    limit: NOTES_PAGE_LIMIT,
+  });
   const createNoteMutation = useCreateNoteMutation();
   const updateNoteMutation = useUpdateNoteMutation();
   const deleteNoteMutation = useDeleteNoteMutation();
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
-  const rawNotes = useMemo(
-    () => extractNotesData(notesQuery.data),
+  const rawNotes: UserNotes[] = useMemo(
+    () => extractNotesQueryItems(notesQuery.data),
     [notesQuery.data],
   );
-  const notes = useMemo(() => rawNotes.map(mapApiNote), [rawNotes]);
+  const notes: NoteDocument[] = useMemo(() => rawNotes.map(mapApiNote), [rawNotes]);
   const validSelectedNoteIdRef = useRef<string | null>(null);
+  const noteCount = useMemo(() => {
+    const summary = extractNotesQuerySummary(notesQuery.data);
+    return summary.total ?? notes.length;
+  }, [notes.length, notesQuery.data]);
+
+  const hasMoreNotes = Boolean(notesQuery.hasNextPage);
+  const isLoadingMoreNotes = Boolean(notesQuery.isFetchingNextPage);
+  const hasNextPage = notesQuery.hasNextPage;
+  const isFetchingNextPage = notesQuery.isFetchingNextPage;
+  const fetchNextPage = notesQuery.fetchNextPage;
+
+  const loadMoreNotes = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage) {
+      return;
+    }
+
+    void fetchNextPage();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   useEffect(() => {
     // Sync the ref with current state
@@ -198,13 +219,9 @@ function useNotesWorkspaceController(): NotesWorkspaceContextValue {
           return;
         }
 
-        queryClient.setQueryData(["notes"], (current: unknown) => {
-          const currentNotes = extractNotesData(current);
-          return [
-            created,
-            ...currentNotes.filter((note) => note._id !== created._id),
-          ];
-        });
+        queryClient.setQueriesData({ queryKey: ["notes"] }, (current) =>
+          prependNoteToNotesQueryData(current, created),
+        );
 
         setSelectedNoteId(created._id);
       },
@@ -248,10 +265,9 @@ function useNotesWorkspaceController(): NotesWorkspaceContextValue {
           : selectedNoteId;
       })();
 
-      queryClient.setQueryData(["notes"], (current: unknown) => {
-        const currentNotes = extractNotesData(current);
-        return currentNotes.filter((note) => note._id !== id);
-      });
+      queryClient.setQueriesData({ queryKey: ["notes"] }, (current) =>
+        removeNoteFromNotesQueryData(current, id),
+      );
 
       setSelectedNoteId(nextSelectedId);
       deleteNoteMutation.mutate(id);
@@ -266,16 +282,26 @@ function useNotesWorkspaceController(): NotesWorkspaceContextValue {
       notes,
       selectedNoteId,
       selectedNote,
+      searchTerm,
+      setSearchTerm,
       selectNote,
       createNote,
       updateNote,
       deleteNote,
-      noteCount: notes.length,
+      noteCount,
+      hasMoreNotes,
+      loadMoreNotes,
+      isLoadingMoreNotes,
     }),
     [
       notes,
       selectedNoteId,
       selectedNote,
+      searchTerm,
+      noteCount,
+      hasMoreNotes,
+      loadMoreNotes,
+      isLoadingMoreNotes,
       selectNote,
       createNote,
       updateNote,

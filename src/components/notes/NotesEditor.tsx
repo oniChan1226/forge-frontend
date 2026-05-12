@@ -246,7 +246,7 @@ export function NotesEditor() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 flex flex-col overflow-y-auto thin-scrollbar no-scrollbar-sm">
+      <div className="flex-1 min-h-0 flex flex-col ">
         <div className="space-y-2">
           <input
             id="note-title"
@@ -429,7 +429,7 @@ export function NotesEditor() {
 
         <div className="border-t border-border my-2" />
 
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-transparent hover:scrollbar-thumb-border no-scrollbar-sm">
           <EditorContent editor={editor} />
         </div>
       </div>

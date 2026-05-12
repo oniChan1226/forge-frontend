@@ -1,11 +1,17 @@
-import type { CreateUserNoteDTO } from "@/types/services/notes";
+import type { CreateUserNoteDTO, GetNotesQueryParams } from "@/types/services/notes";
 import { apiClient } from ".";
 
 const BaseRoute = "/users/notes";
 
 export const NotesService = {
-  getNotes: async () => {
-    const res = await apiClient.get(BaseRoute);
+  getNotes: async (params: GetNotesQueryParams = {}) => {
+    const res = await apiClient.get(BaseRoute, {
+      params: {
+        search: params.search ?? "",
+        page: params.page ?? 1,
+        limit: params.limit ?? 20,
+      },
+    });
     return res.data;
   },
 
