@@ -52,6 +52,7 @@ export function TodoModalProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTodoModal() {
   const context = useContext(TodoModalContext);
   if (!context) {

@@ -1,11 +1,12 @@
 // sidebar.routes.ts
 import {
   LayoutDashboard,
-  FolderKanban,
+  // FolderKanban,
   CalendarDays,
   ListTodo,
   Settings,
   FileText,
+  Repeat,
 } from "lucide-react";
 
 export const sidebarRoutes = [
@@ -20,14 +21,19 @@ export const sidebarRoutes = [
     icon: ListTodo,
   },
   {
+    label: "Habits",
+    to: "/habits",
+    icon: Repeat,
+  },
+  // {
+  //   label: "Projects",
+  //   to: "/projects",
+  //   icon: FolderKanban,
+  // },
+  {
     label: "Notes",
     to: "/notes",
     icon: FileText,
-  },
-  {
-    label: "Projects",
-    to: "/projects",
-    icon: FolderKanban,
   },
   {
     label: "Calendar",

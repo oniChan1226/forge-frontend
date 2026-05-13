@@ -4,4 +4,5 @@ export const ROUTE_PATHS = {
   signup: "/signup",
   todos: "/todos",
   notes: "/notes",
+  habits: "/habits",
 } as const;

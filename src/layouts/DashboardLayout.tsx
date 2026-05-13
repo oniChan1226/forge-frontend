@@ -4,10 +4,16 @@ import { Sidebar } from "@/components/dashboard/sidebar/Sidebar";
 import Logo from "@/assets/logo.png";
 import Header from "@/components/dashboard/header/Header";
 import BreadcrumbNav from "@/components/breadcrumbs/Breadcrumb";
+import { useNavigate } from "react-router-dom";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navigate = useNavigate();
+  const handleBaseClick = () => {
+    navigate("/dashboard");
+  }
 
   return (
     <main className="h-screen flex overflow-hidden">
@@ -25,9 +31,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         ${collapsed ? "w-16" : "w-52"}`}
       >
         {/* Logo / Header */}
-        <div className="h-16 flex items-center justify-between px-4">
+        <div className="h-16 flex items-center justify-between px-4 ">
           {!collapsed && (
-            <div className="flex items-center justify-center space-x-1">
+            <div className="flex items-center justify-center space-x-1 cursor-default" onClick={handleBaseClick}>
               <img src={Logo} alt="Logo" className="w-7 h-7 rounded-md" />
               <span className="text-primary font-bold text-lg">Forge</span>
             </div>
