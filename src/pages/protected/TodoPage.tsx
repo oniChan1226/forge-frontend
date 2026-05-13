@@ -60,7 +60,7 @@ const TodoPageContent = () => {
     <div className="relative">
       <div className="flex space-y-4 md:space-y-0 flex-col md:flex-row md:items-end justify-between gap-x-2">
         <PageTitle
-          title="Heat List"
+          title="Todos"
           subtitle=""
           highlight="@tags to organize, !priority to escalate."
         />
