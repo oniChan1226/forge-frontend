@@ -339,8 +339,8 @@ export function CreateTodoModal() {
                       position="popper"
                       className="w-[--radix-select-trigger-width]"
                     >
-                      <SelectItem value="low">Meh</SelectItem>
-                      <SelectItem value="medium">Maybe Important</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
                       <SelectItem value="high">Important</SelectItem>
                       <SelectItem value="urgent">Urgent</SelectItem>
                     </SelectContent>

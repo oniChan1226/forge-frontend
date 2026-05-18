@@ -17,8 +17,8 @@ export const priorityBadgeStyles = {
 };
 
 export const priorityOptionsMap = {
-  low: "Meh",
-  medium: "Maybe Important",
+  low: "Low",
+  medium: "Medium",
   high: "Important",
   urgent: "Urgent",
 }
